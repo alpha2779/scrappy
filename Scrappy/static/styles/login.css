@@ -1,0 +1,139 @@
+html {
+    height: 100%;
+}
+body{
+    background: linear-gradient(129deg, #0f8570 43%, #06aca4 100%) !important;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.content{
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+}
+.wrap-login {
+    width: 500px;
+    background: #fff;
+    overflow: hidden;
+    border-radius: 20px;
+    z-index: 1000;
+    box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.3);
+    padding: 40px;
+    margin-bottom: 20px;
+}
+.login100-form-title {
+    display: block;
+    line-height: 1.2;
+    text-align: center;
+    font-size: 40px;
+    font-weight: 500;
+    color: #B00057;
+}
+.login-form-span {
+    display: block;
+    line-height: 1.2;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+    color: #0f8570;
+}
+.p-b-26 {
+    padding-bottom: 10px;
+}
+._26NNk {
+    display: block;
+    margin: 0 auto;
+    box-sizing: border-box;
+    padding: 0 5px;
+}
+.cust-container {
+    text-align: center;
+    padding-bottom: 48px;
+}
+.tit-h1, span, .logo-image {
+    display: inline-block;
+    vertical-align: middle;
+}
+.tit-h1 {
+    text-align: center;
+    font-size: 35px;
+    line-height: 32px;
+    font-weight: 500;
+    margin: 0;
+    color: #2d2b6a;
+}
+.logo-image {
+    max-width: 100px;
+}
+.wrap-input {
+    width: 100%;
+    margin-bottom: 30px;
+}
+#scan-btn {
+    border-radius: 15px;
+    width: 100%;
+    margin: 0 auto;
+    float: right;
+    background-color: #2d2b6a;
+    border-color: #ffffff;
+}
+#scan-btn:hover{
+    border-radius: 15px;
+    width: 100%;
+    margin: 0 auto;
+    float: right;
+    background-color: #ffffff;
+    color: #2d2b6a;
+    border-color: #2d2b6a;
+}
+.cust-container-2 {
+    padding-bottom: 48px;
+}
+
+/* loading overlay */
+
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#loading-overlay img {
+    width: 100px;
+    height: 100px;
+    animation: spin 1s linear infinite;
+} 
+
+#loading-message {
+    color: white;
+    font-size: 16px;
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: 20px;
+    border: 1px solid #B00057;
+    background: linear-gradient(129deg, #0f8570 43%, #F07D0A 100%) !important;;
+  }
+
+@keyframes spin {
+0% {
+    transform: rotate(0deg);
+}
+100% {
+    transform: rotate(360deg);
+}
+}
+.li-flashes {
+    list-style-type: none;
+}

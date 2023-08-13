@@ -1,0 +1,81 @@
+<!-- index.html -->
+{% extends 'base.html' %}
+
+{% block title %}Accueil - Scrappy{% endblock %}
+
+{% block content %}
+  <main class="content" role="main">
+    <ul class="nav nav-pills" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" data-toggle="pill" href="#url">URL</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="pill" href="#multiple-urls">Plusieurs URLs</a>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <div id="url" class="container tab-pane active">
+        <form method="POST" action="/scan" onsubmit="showLoading()">
+          <div id="hosts-container">
+            <div class="form-group">
+              <label for="hosts">Url 1</label>
+              <input type="text" class="form-control" placeholder="example.com" name="url" id="hosts" required>
+              <small id="emailHelp" class="form-text text-muted">Entrez un nom d'hôte ou une adresse IP.</small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <input type="button" id="hostbutton" class="btn btn-primary" value="+ Ajouter URL">
+          </div>
+
+          <button id="scan-btn-2" type="submit" class="btn btn-primary">Scanner</button>
+        </form>
+      </div>
+
+      <div id="multiple-urls" class="container tab-pane fade">
+        <form method="POST" action="/scan-multiple" onsubmit="showLoading()">
+          <div class="form-group">
+            <label for="multiple-url">URLs</label>
+            <textarea class="form-control" cols="30" rows="10" placeholder="example.com" name="multiple-urls" id="multiple-urls"></textarea>
+            <small id="emailHelp" class="form-text text-muted">Entrez plusieurs URL séparées par une nouvelle ligne</small>
+          </div>
+          <button id="scan-btn" type="submit" class="btn btn-primary">Scanner</button>
+        </form>
+      </div>
+    </div>
+  </main>
+{% endblock %}
+
+{% block script %}
+<script>
+  function showLoading() {
+    document.getElementById("scan-btn-2").style.display = "none";
+    document.getElementById("scan-btn").style.display = "none";
+    document.getElementById("loading-overlay").style.display = "flex";
+  }
+
+  var hostCount = 1;
+  var container = document.getElementById("hosts-container");
+  var addButton = document.getElementById("hostbutton");
+
+  addButton.addEventListener("click", function() {
+    hostCount++;
+    var newInput = document.createElement("div");
+    newInput.innerHTML = `
+      <div class="form-group">
+        <label for="hosts${hostCount}">Url ${hostCount}</label>
+        <input type="text" class="form-control" placeholder="example.com" name="hosts${hostCount}" id="hosts${hostCount}">
+        <button type="button" class="btn btn-sm btn-danger delete-btn" onclick="deleteFormGroup(this)">Supprimer</button>  
+      </div>
+    `;
+    container.appendChild(newInput);
+  });
+
+  function deleteFormGroup(button) {
+    var formGroup = button.parentNode;
+    formGroup.parentNode.removeChild(formGroup);
+  }
+</script>
+{% endblock %}
+
