@@ -3,7 +3,7 @@ html {
 }
 body{
     background: linear-gradient(129deg, #0f8570 43%, #06aca4 100%) !important;
-
+    font-family: "Open Sans",sans-serif;
     min-height: 100%;
 
     display: flex;
