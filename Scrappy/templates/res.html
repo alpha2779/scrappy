@@ -550,7 +550,9 @@
         let countSelected = 0;
 
         // Get the counter display element
-        const countDisplay = document.getElementsByClassName('selectedCount');
+        const countDisplay1 = document.getElementsByClassName('selectedCount')[0];
+        const countDisplay2 = document.getElementsByClassName('selectedCount')[1];
+
 
         // Event listener for checkboxes
         checkboxes.forEach(checkbox => {
@@ -562,7 +564,8 @@
                 }
                 
                 // Update the display counter
-                countDisplay.textContent = `${countSelected}`;
+                countDisplay1.textContent = `${countSelected}`;
+                countDisplay2.textContent = `${countSelected}`;
             });
         });
       </script>
