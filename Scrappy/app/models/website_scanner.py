@@ -5,6 +5,7 @@ from urllib.parse import urljoin
 from urllib.parse import urlparse
 from functools import lru_cache
 from app.utils.page_utils import PageUtils
+import re
 
 
 class WebsiteScanner:
@@ -15,6 +16,7 @@ class WebsiteScanner:
         self.page_components = {}
         self.visited_urls = set()
         self.href_set = set()
+        self.session = requests.Session()  # Create one session for all requests
 
     def scan_website(self):
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -33,17 +35,12 @@ class WebsiteScanner:
         dataResults = []
         count = 0
 
-        # Add "https://" to the URL if it doesn't start with "http://" or "https://"
-        if not url.startswith("http://") and not url.startswith("https://"):
+        # Use tuple for startswith check
+        if not url.startswith(("http://", "https://")):
             url = "https://" + url
 
-        # Parse the URL to extract the domain
-        parsed_url = urlparse(url)
-        domain = parsed_url.netloc
-
-        # Send a GET request to the URL
-        session = requests.Session()
-        response = session.get(url)
+        # Use the session created during initialization
+        response = self.session.get(url)
 
         # Check if the request was successful
         if response.status_code == 200:
@@ -95,38 +92,41 @@ class WebsiteScanner:
         return base_parsed.netloc == absolute_parsed.netloc
 
     def get_page_title(self, url):
-        try:
-            session = requests.Session()
-            response = session.get(url)
-            response.raise_for_status()
-
-            soup = BeautifulSoup(response.content, 'html.parser')
+        # Get content once and store it
+        content = self.get_content(url)
+        if content:
+            soup = BeautifulSoup(content, 'html.parser')
             title_tag = soup.find('title')
             if title_tag:
                 return title_tag.string
-        except requests.exceptions.RequestException as e:
-            print(f"Error occurred while fetching page title: {e}")
-
         return None
+
+    @lru_cache(maxsize=None)
+    def get_content(self, url):
+        try:
+            response = self.session.get(url)
+            response.raise_for_status()
+            return response.content
+        except requests.exceptions.RequestException:
+            return None
 
     def get_urls(self):
         return self.urlResultArray
 
     def get_type_page(self, url):
-        if self.is_home_page(url):
-            return "home"
-        if self.is_contact_page(url):
-            return "contact"
-        if self.is_authentication_page(url):
-            return "authentication"
-        if self.is_sitemap_page(url):
-            return "sitemap"
-        if self.is_help_page(url):
-            return "help"
-        if self.is_search_page(url):
-            return "search"
-        if self.is_accessibility_page(url):
-            return "accessibility"
+        page_types = {
+            self.is_home_page: "home",
+            self.is_contact_page: "contact",
+            self.is_authentication_page: "authentication",
+            self.is_sitemap_page: "sitemap",
+            self.is_help_page: "help",
+            self.is_search_page: "search",
+            self.is_accessibility_page: "accessibility",
+            # ... add other page type checks here ...
+        }
+        for check, page_type in page_types.items():
+            if check(url):
+                return page_type
 
     def is_home_page(self, url):
         return PageUtils.is_home_page(url)
@@ -184,12 +184,32 @@ class WebsiteScanner:
             components.append('image')
         if soup.find('table'):
             components.append('table')
-        if soup.find('form'):
-            components.append('formulaire')
-        if soup.find('input'):
-            components.append('input')
-        if soup.find('blockquote'):
+        if soup.find('blockquote') or soup.find('q'):
             components.append('citation')
+        if soup.find('form'):
+            forms = soup.find_all('form')
+            for form in forms:
+                # Check for search forms based on input type, placeholder, or name
+                search_input = form.find('input', {'type': ['search', 'text'],
+                                                   'placeholder': re.compile(r'search|query|find', re.I),
+                                                   'name': re.compile(r'search|query|find', re.I)})
+                # Check form action or button label
+                search_action = 'search' in form.get('action', '').lower()
+                search_button = form.find(
+                    'input', {'type': 'submit', 'value': re.compile(r'search|find', re.I)})
+
+                if search_input or search_action or search_button:
+                    components.append('Recherche')
+                else:
+                    components.append('formulaire')
+
+        # Check for the presence of PDF documents and count them
+        pdf_links = soup.find_all('a', href=re.compile(r'\.pdf$', re.I))
+        num_pdfs = len(pdf_links)
+
+        if num_pdfs > 0:
+            components.append('pdf')
+            components.append({'pdf_count': num_pdfs})
 
         # Check for the presence of iframe and its visibility
         iframe = soup.find('iframe')
