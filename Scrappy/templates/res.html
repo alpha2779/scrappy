@@ -113,7 +113,7 @@
                                             <p class="text-sm mb-0 text-capitalize">Nombre de sites</p>
                                         </div>
                                         <div class="col-4 text-end">
-                                            <i class="ni ni-money-coins text-lg text-primary" aria-hidden="true"></i>
+                                            <img src="{{ url_for('static',filename='images/counter.png') }}" alt="">
                                         </div>
                                     </div>
                                 </div>
@@ -131,7 +131,25 @@
                                             <p class="text-sm mb-0 text-capitalize">Nombre total de pages</p>
                                         </div>
                                         <div class="col-4 text-end">
-                                            <i class="ni ni-money-coins text-lg text-primary" aria-hidden="true"></i>
+                                            <img src="{{ url_for('static',filename='images/counter.png') }}" alt="">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+                            <div class="card shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col-8">
+                                            <h5 class="font-weight-bolder mb-0">
+                                                {{average_pages_per_result}}
+                                            </h5>
+                                            <p class="text-sm mb-0 text-capitalize">Moyenne de pages par site</p>
+                                        </div>
+                                        <div class="col-4 text-end">
+                                            <img src="{{ url_for('static',filename='images/complexity.png') }}" alt="">
                                         </div>
                                     </div>
                                 </div>
@@ -311,9 +329,11 @@
                                                     </td>
                                             </tr>
                                         {% else %}
-                                            <div class="bg-light text-center rounded p-3 mt-3">
-                                                Pas de données
-                                            </div>
+                                            <tr>
+                                                <div class="bg-light text-center rounded p-3 mt-3">
+                                                    Pas de données
+                                                </div>
+                                            </tr>
                                         {% endif %}
                                     {% endfor %}
                                 </tbody>
