@@ -605,7 +605,7 @@
             let selectedRows = [];
             document.querySelectorAll('.rowCheckbox:checked').forEach(function(checkbox) {
                 let row = checkbox.closest('.tr-all-pages');
-                let url = row.querySelector('.lien-page').textContent;
+                let url = row.querySelector('.lien-page').textContent.trim();
                 let pageName = row.cells[2].textContent.trim();
                 let componentsCell = row.cells[3];
                 let componentsList = Array.from(componentsCell.querySelectorAll('span')).map(span => span.textContent.trim());
