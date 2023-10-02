@@ -157,7 +157,10 @@
                                         {% for data in urlResults %}
                                         <tr>
                                             <td>
-                                                <a class="lien-page mb-0 text-sm" href="{{ data['url'] }}" target="_blank">{{ data['url'] }}</a>
+                                                <a class="lien-page mb-0 text-sm" href="{{ data['url'] }}" target="_blank">
+                                                    {{ data['url'] }}
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </a>
                                             </td>
                                             <td>
                                                 <p class="text-sm font-weight-bold mb-0">{{data['page_count']}}</p>
@@ -359,7 +362,10 @@
                                             <td>
                                                 <div class="d-flex px-2">
                                                     <div class="my-auto">
-                                                        <a class="lien-page mb-0 text-sm" href="{{ dataAllUrls['absolute_url'] }}" target="_blank">{{ dataAllUrls['absolute_url'] }}</a>
+                                                        <a class="lien-page mb-0 text-sm" href="{{ dataAllUrls['absolute_url'] }}" target="_blank">
+                                                            {{ dataAllUrls['absolute_url'] }} 
+                                                            <i class="fas fa-external-link-alt"></i>
+                                                        </a> 
                                                     </div>
                                                 </div>
                                             </td>
