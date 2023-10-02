@@ -307,13 +307,15 @@
                                                     {% endif %}
                                                     </td>
                                             </tr>
+                                        {% else %}
+                                            <div class="bg-light text-center rounded p-3 mt-3" style="display: none;">
+                                                Pas de données
+                                            </div>
                                         {% endif %}
                                     {% endfor %}
                                 </tbody>
                             </table>
-                            <div class="bg-light text-center rounded p-3 mt-3" style="display: none;">
-                                Pas de données
-                            </div>
+                            
                             
                         </div>
                     </section>
