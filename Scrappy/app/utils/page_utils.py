@@ -27,14 +27,23 @@ class PageUtils:
 
     @staticmethod
     def is_home_page(url):
-        if url.endswith("/"):
+        # Normalize the URL (lowercase and remove query strings/fragments)
+        normalized_url = url.split('?')[0].split('#')[0].lower()
+
+        parsed_url = urlparse(normalized_url)
+
+        # Check if only the root domain with a trailing '/'
+        if normalized_url == f"{parsed_url.scheme}://{parsed_url.netloc}/":
             return True
-        if url == "https://example.com/":
+
+        # Check other common homepage indicators
+        if normalized_url.endswith(("/index.html", "/home.php", "/default.aspx")):
             return True
-        if url.endswith("/index.html"):
+
+        # Check for specific hardcoded domains
+        if normalized_url in {"https://example.com", "http://example.com"}:
             return True
-        if "home" in url or "main" in url:
-            return True
+
         return False
 
     @staticmethod
