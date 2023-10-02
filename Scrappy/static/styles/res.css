@@ -56,11 +56,16 @@ body {
 .nav-item {
     display: flex;
     align-items: center; /* To vertically align the icon with the text */
+    overflow: hidden; /* Hide overflow content */
+    text-overflow: ellipsis; /* Add ... for overflow content */
+    white-space: nowrap; /* Prevent wrapping */
 }
+
 
 .nav-link {
     display: flex;
     align-items: center; /* To vertically align the icon with the text */
+    width: 95%; /* Adjust width as needed */=
     overflow: hidden; /* Hide overflow content */
     text-overflow: ellipsis; /* Add ... for overflow content */
     white-space: nowrap; /* Prevent wrapping */
