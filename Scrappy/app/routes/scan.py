@@ -9,7 +9,7 @@ from pathlib import Path
 bp = Blueprint('scan', __name__)
 
 
-@bp.route('/scan/', methods=["GET", "POST"])
+@bp.route('/scan', methods=["GET", "POST"])
 @login_required
 def scan():
     if request.method == "GET":
