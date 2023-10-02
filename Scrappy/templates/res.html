@@ -267,7 +267,10 @@
                                                 <td>
                                                     <div class="d-flex px-2">
                                                         <div class="my-auto">
-                                                        <a class="lien-page mb-0 text-sm" href="{{ dataAllUrls['absolute_url'] }}" target="_blank">{{ dataAllUrls['absolute_url'] }}</a>
+                                                            <a class="lien-page mb-0 text-sm" href="{{ dataAllUrls['absolute_url'] }}" target="_blank">
+                                                                {{ dataAllUrls['absolute_url'] }} 
+                                                                <i class="fas fa-external-link-alt"></i>
+                                                            </a>                                                            
                                                         </div>
                                                     </div>
                                                     </td>
@@ -308,9 +311,9 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
-                            <div class="bg-light text-center rounded p-3 mt-3">
+                            <div class="bg-light text-center rounded p-3 mt-3" style="display: none;">
                                 Pas de données
-                            </div>  
+                            </div>
                             
                         </div>
                     </section>

@@ -6,9 +6,13 @@ from app.models.website_scanner import WebsiteScanner
 bp = Blueprint('scan_multiple', __name__)
 
 
-@bp.route('/scan-multiple', methods=["POST"])
+@bp.route('/scan-multiple', methods=["GET", "POST"])
 @login_required
 def scan_multiple():
+    if request.method == "GET":
+        # Redirect them to the homepage or wherever you'd like
+        return redirect(url_for('index.index'))
+    
     urls = request.form.get("multiple-urls").split("\n")
     urls = [url.strip() for url in urls if url.strip()]
 
@@ -21,7 +25,7 @@ def scan_multiple():
     average_pages_per_result = sum_page_count / \
         total_results if total_results > 0 else 0
 
-    return render_template('results.html',
+    return render_template('res.html',
                            urlResults=urlResults,
                            sum_page_count=sum_page_count,
                            average_pages_per_result=average_pages_per_result)
