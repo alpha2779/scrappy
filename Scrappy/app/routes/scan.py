@@ -19,6 +19,9 @@ def scan():
     form_data = request.form.to_dict()
     values_list = list(form_data.values())
 
+    # Remove duplicates from values_list
+    values_list = list(set(values_list))
+
     scanner = WebsiteScanner(values_list)
     scanner.scan_website()
 
@@ -36,6 +39,7 @@ def scan():
                            urlResults=urlResults,
                            sum_page_count=total_pages,
                            average_pages_per_result=average_pages_per_result)
+
 
 
 @bp.route('/scan/generate/', methods=["POST"])
