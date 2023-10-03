@@ -211,9 +211,9 @@
                 <section id="site-a-content-{{ loop.index }}" class="site-a-content">
                     <header class="content-header">
                         <h2 style="padding: 10px 0;">{{ data['url'] }}</h2>
-                        <button id="generateFiles" class="btn-generate">
+                        <button class="generateFiles btn-generate">
                             <i class="fa-solid fa-file-excel"></i>
-                            Télécharger L'Excel
+                            Valider L'échantillon
                         </button>
                     </header>
                 
@@ -240,17 +240,17 @@
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
                                         <div class="col-8">
-                                            <h5 class="font-weight-bolder mb-0">
+                                            <h5 class="font-weight-bolder mb-0 {% if data['page_count'] <= 10 %}text-success{% elif data['page_count'] <= 50 %}text-alert{% else %}text-danger{% endif %}">
                                                 {% if data['page_count'] <= 10 %}
                                                     Ultra Simple
                                                 {% elif data['page_count'] <= 50 %}
                                                     Simple
                                                 {% else %}
                                                     Complexe
-                                                {%endif%}
+                                                {% endif %}
                                             </h5>
                                             <p class="text-sm mb-0 text-capitalize">Complexité</p>
-                                        </div>
+                                        </div>                                        
                                         <div class="col-4 text-end">
                                             <img src="{{ url_for('static',filename='images/complexity.png') }}" alt="">
                                         </div>
@@ -348,7 +348,6 @@
                             <p>Filtrer par composants.</p>
                         </header>
                         <div class="filter-buttons">
-                            <!-- Filter buttons here, kept the structure as in the original code but added "filter-buttons" for styling -->
                             <button class="badge badge-sm bg-filter-red filter-option" data-component="Tout Les Composants">Tout Les Composants</button>
                             <button class="badge badge-sm bg-filter filter-option" data-component="Images(s)">Images(s)</button>
                             <button class="badge badge-sm bg-filter filter-option" data-component="Video(s)">Video(s)</button>
@@ -361,8 +360,7 @@
                             <button class="badge badge-sm bg-filter filter-option" data-component="PDF">PDF</button>
                         </div>
                         <div class="table-wrapper">
-                            <!-- Table content for all pages, kept the structure as in the original code -->
-                            <table class="table table-hover table-bordered">
+                            <table id="table-{{ loop.index }}" class="table table-hover table-bordered">
                                 <thead class="thead-side-color">
                                     <tr>
                                         <th class="text-uppercase text-white font-weight-bolder text-white selectedCount">0</th>
@@ -429,231 +427,42 @@
                     </section>
                 </section>
                 {% endfor %}
-
-            
-                
+ 
             </main>
             
         </div>
     </div>
-        
 
-    <!-- <div id="loading-overlay">
-        <img id="Calque_1" src="{{ url_for('static',filename='images/favicon-Ipedis.svg') }}" alt="Loading" />
-        <p id="loading-message">Chargement...</p>
-    </div> -->
+    <!-- Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title">Valider l'échantillon</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la Modale">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+            <!-- The table to display selected rows will be dynamically populated using JS -->
+            <table id="confirmationTable" class="table table-hover table-bordered"></table>
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Reprendre</button>
+            <button type="button" class="btn btn-primary btn-generate" id="confirmDownload">
+                <i class="fa-solid fa-file-excel"></i>
+                Valider
+            </button>
+            </div>
+        </div>
+        </div>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"></script>
     <script src="{{ url_for('static',filename='js/loading-messages.js') }}"></script>
-    <script>
-        $(document).ready(function () {
-            $("#toggleSidebar").on("click", function () {
-                $("#sidebar").toggleClass("d-none");
-            });
-        });
-
-        function showLoading() {
-            document.getElementById("scan-btn").style.display = "none";
-            document.getElementById("loading-overlay").style.display = "flex";
-        }
-    </script>
-    <script>
-        function confirmScanAgain() {
-            var isConfirmed = confirm("Voulez-vous effectuer un nouveau scan?");
-            if (isConfirmed) {
-                // Navigate to the new scan page
-                window.location.replace("/");  // Adjust the URL to your actual new scan page path
-            }
-            return false;  // This ensures the button doesn't follow through with any default behavior
-        }
-        // window.addEventListener('popstate', function(event) {
-        //   if (!confirm("Voulez-vous vraiment quitter cette page?")) {
-        //       event.preventDefault();
-        //   }
-        // });
-
-        // // The following line is necessary to initialize the popstate detection
-        // history.pushState(null, null, document.URL);
-      
-      
-        window.addEventListener('beforeunload', function(e) {
-          e.preventDefault();
-          e.returnValue = "Des modifications non enregistrées pourraient être perdues. Voulez-vous vraiment quitter?";
-        });
-      
-        document.addEventListener('DOMContentLoaded', () => {
-          // Get all filter options
-          const filterOptions = document.querySelectorAll('.filter-option');
-      
-          // Get all table rows
-          const tableRows = document.querySelectorAll('.tbody-all-pages .tr-all-pages');
-      
-          // Hide all Site A content initially
-          const siteAContent = document.querySelectorAll('.site-a-content');
-          siteAContent.forEach(content => {
-            content.style.display = 'none';
-          });
-      
-          // Add click event listener to the parent element of filter options
-          document.addEventListener('click', (event) => {
-            const target = event.target;
-            if (target.classList.contains('filter-option')) {
-              // Get the selected component
-              const selectedComponent = target.getAttribute('data-component');
-      
-              // Clear all previous highlights
-              const allComponents = document.querySelectorAll('.badge.bg-gradient-success.activeHighlight');
-              allComponents.forEach(comp => comp.classList.remove('activeHighlight'));
-      
-              // Show/hide rows based on the selected component
-              let anyRowVisible = false;  // Track if any row is visible
-              // Show/hide rows and highlight matching components
-              tableRows.forEach(row => {
-                      const components = Array.from(row.querySelectorAll('.badge.bg-gradient-success'));
-                      if (selectedComponent === 'Tout Les Composants') {
-                          row.style.display = 'table-row';
-                          anyRowVisible = true;
-                      } else {
-                          const matchingComponents = components.filter(component => component.textContent.includes(selectedComponent));
-                          if (matchingComponents.length > 0) {
-                              row.style.display = 'table-row';
-                              anyRowVisible = true;
-                              matchingComponents.forEach(comp => comp.classList.add('activeHighlight')); // highlight matched components
-                          } else {
-                              row.style.display = 'none';
-                          }
-                      }
-                  });
-      
-      
-              // Display or hide the message based on row visibility
-              const noContentMessage = document.querySelector('.no-content-message');
-              if (anyRowVisible) {
-                noContentMessage.style.display = 'none';
-              } else {
-                noContentMessage.style.display = 'block';
-              }
-      
-              // Remove active class from all filter options
-              filterOptions.forEach(option => option.classList.remove('active'));
-      
-              // Add active class to the selected filter option
-              target.classList.add('active');
-            } else if (target.id === 'dashboard-link') {
-              // Switch to the Dashboard content
-              siteAContent.forEach(content => {
-                content.style.display = 'none';
-              });
-              document.getElementById('dashboard-content').style.display = 'block';
-              document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-              });
-              target.classList.add('active');
-            }
-            {% for data in urlResults %}
-            else if (target.id === 'site-a-link-{{ loop.index }}') {
-              // Switch to the respective Site A content
-              const siteIndex = {{ loop.index }};
-              siteAContent.forEach(content => {
-                content.style.display = 'none';
-              });
-              document.getElementById(`site-a-content-${siteIndex}`).style.display = 'block';
-              document.getElementById('dashboard-content').style.display = 'none';
-              document.getElementById('dashboard-link').classList.remove('active');
-              document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-              });
-              target.classList.add('active');
-            }
-            {% endfor %}
-          });
-        });
-      </script>
-        <!-- select counter -->
-      <script>
-        // Get all row checkboxes
-        const checkboxes = document.querySelectorAll('.rowCheckbox');
-
-        // Counter for selected rows
-        let countSelected = 0;
-
-        // Get the counter display element
-        const countDisplay1 = document.getElementsByClassName('selectedCount')[0];
-        const countDisplay2 = document.getElementsByClassName('selectedCount')[1];
-
-
-        // Event listener for checkboxes
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                if (this.checked) {
-                    countSelected++;
-                } else {
-                    countSelected--;
-                }
-                
-                // Update the display counter
-                countDisplay1.textContent = `${countSelected}`;
-                countDisplay2.textContent = `${countSelected}`;
-            });
-        });
-      </script>
-      <!-- file generation -->
-      <script>
-        document.getElementById('generateFiles').addEventListener('click', function() {
-            let selectedRows = [];
-            document.querySelectorAll('.rowCheckbox:checked').forEach(function(checkbox) {
-                let row = checkbox.closest('.tr-all-pages');
-                let url = row.querySelector('.lien-page').textContent.trim();
-                let pageName = row.cells[2].textContent.trim();
-                let componentsCell = row.cells[3];
-                let componentsList = Array.from(componentsCell.querySelectorAll('span')).map(span => span.textContent.trim());
-                let components = componentsList.join(', ');
-
-                // Continue extracting other needed data...
-
-                selectedRows.push({
-                    url: url,
-                    pageName: pageName,
-                    components: components,
-                    // ... add other data here
-                });
-            });
-
-            if (selectedRows.length > 0) {
-                sendDataToServer(selectedRows);
-            } else {
-                alert('Please select data before generating files.');
-            }
-        });
-
-
-        function sendDataToServer(data) {
-            fetch('/scan/generate/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.blob();
-            })
-            .then(blob => {
-                let link = document.createElement('a');
-                link.href = window.URL.createObjectURL(blob);
-                link.download = "output.xlsx";
-                link.click();
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-        }
-      </script>
+    <script src="{{ url_for('static',filename='js/res.js') }}"></script>
 
 </body>
 </html>

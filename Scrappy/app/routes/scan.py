@@ -4,10 +4,9 @@ from flask_login import login_required
 from app.models.website_scanner import WebsiteScanner
 from openpyxl import Workbook, load_workbook
 from pathlib import Path
-
+from datetime import datetime
 
 bp = Blueprint('scan', __name__)
-
 
 @bp.route('/scan', methods=["GET", "POST"])
 @login_required
@@ -50,7 +49,7 @@ def generate():
     file_path = current_dir.parent.parent / \
         "resources" / "Desktop_Estimation_CLIENT_SITE_ANNEE.xlsx"
 
-    # For demonstration, I'll use Excel:
+    # Load the workbook:
     wb = load_workbook(file_path)
     ws = wb.active
     start_row = 2
@@ -58,22 +57,24 @@ def generate():
         ws.cell(row=start_row, column=2, value=item['pageName'])
         ws.cell(row=start_row, column=3, value=item['url'])
         ws.cell(row=start_row, column=4, value=item['components'])
-        print(item['pageName'])
-        print(item['url'])
         # ... Populate other columns as needed
         start_row += 1
 
-    excel_file_path = current_dir.parent.parent / \
-        "Dowloads"
-    output_filename = 'output.xlsx'
-    # Joining paths correctly using the `/` operator
-    full_path = excel_file_path / output_filename
+    # Creating a unique filename with the current date and time
+    current_time_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    output_filename = f'output_{current_time_str}.xlsx'
 
+    excel_file_path = current_dir.parent.parent / "Dowloads"
+    
     # Ensure the directory exists
     excel_file_path.mkdir(parents=True, exist_ok=True)
+    
+    # Joining paths correctly using the `/` operator
+    full_path = excel_file_path / output_filename
 
     # Save the workbook in the specified directory
     wb.save(full_path)
 
     # Note: send_from_directory expects string paths, so we convert the directory path to a string
     return send_from_directory(directory=str(excel_file_path), path=output_filename, as_attachment=True)
+
