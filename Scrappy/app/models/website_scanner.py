@@ -115,13 +115,13 @@ class WebsiteScanner:
 
     def get_type_page(self, url):
         page_types = {
-            self.is_home_page: "home",
-            self.is_contact_page: "contact",
-            self.is_authentication_page: "authentication",
-            self.is_sitemap_page: "sitemap",
-            self.is_help_page: "help",
-            self.is_search_page: "search",
-            self.is_accessibility_page: "accessibility",
+            self.is_home_page: "Accueil",
+            self.is_contact_page: "Contact",
+            self.is_authentication_page: "Authentification",
+            self.is_sitemap_page: "Plan du site",
+            self.is_help_page: "Aide",
+            self.is_search_page: "Recherche",
+            self.is_accessibility_page: "Accessibilité",
             # ... add other page type checks here ...
         }
         for check, page_type in page_types.items():
@@ -188,6 +188,9 @@ class WebsiteScanner:
             components.append('citation')
         if soup.find('form'):
             forms = soup.find_all('form')
+            search_input = False
+            search_action = False
+            search_button = False
             for form in forms:
                 # Check for search forms based on input type, placeholder, or name
                 search_input = form.find('input', {'type': ['search', 'text'],
@@ -198,10 +201,10 @@ class WebsiteScanner:
                 search_button = form.find(
                     'input', {'type': 'submit', 'value': re.compile(r'search|find', re.I)})
 
-                if search_input or search_action or search_button:
-                    components.append('Recherche')
-                else:
-                    components.append('formulaire')
+            if search_input or search_action or search_button:
+                components.append('Recherche')
+            else:
+                components.append('formulaire')
 
         # Check for the presence of PDF documents and count them
         pdf_links = soup.find_all('a', href=re.compile(r'\.pdf$', re.I))

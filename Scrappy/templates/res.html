@@ -266,75 +266,85 @@
                             <p>Les pages obligatores qui sont présentes dans le site sont toutes marquées dans cette section.</p>
                         </header>
                         <div class="table-wrapper">
-                            <!-- Table content here, kept the structure as in the original code but added "table-wrapper" for styling -->
+                            {% set desired_page_names = ["Accueil", "Contact", "Accessibilité", "Plan du site", "Aide", "Authentification","Recherche"] %}
                             <table class="table table-hover table-bordered">
                                 <thead class="thead-side-color">
                                     <tr>
                                         <th class="text-uppercase text-white font-weight-bolder text-white selectedCount">0</th>
-                                        <th class="text-uppercase text-white font-weight-bolder text-white ">URL</th>
-                                        <th class="text-uppercase text-white font-weight-bolder ps-2">Nom de page</th>
-                                        <th class="text-uppercase text-xxs font-weight-bolderps-2">Status</th>
+                                        <th class="text-uppercase text-white font-weight-bolder ps-2">URL</th>
+                                        <th class="text-uppercase text-white font-weight-bolder text-white ">Nom de page</th>
                                         <th class="text-uppercase text-white font-weight-bolder ps-2">Composants</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for dataAllUrls in data['all_urls'] %}
-                                        {% if dataAllUrls['page_type'] is not none %}
-                                            <tr class="tr-all-pages">
-                                                <td>
-                                                    <input type="checkbox" class="rowCheckbox">
-                                                </td>
-                                                <!-- The rest of your row's data ... -->
-                                                <td>
-                                                    <div class="d-flex px-2">
-                                                        <div class="my-auto">
-                                                            <a class="lien-page mb-0 text-sm" href="{{ dataAllUrls['absolute_url'] }}" target="_blank">
-                                                                {{ dataAllUrls['absolute_url'] }} 
-                                                                <i class="fas fa-external-link-alt"></i>
-                                                            </a>                                                            
-                                                        </div>
-                                                    </div>
-                                                    </td>
-                                                    <td>
-                                                    <p class="text-sm font-weight-bold mb-0">{{ dataAllUrls['page_title'] }}</p>
-                                                    </td>
-                                                    <td>
-                                                    <span class="text-xs font-weight-bold">{{ dataAllUrls['page_type'] }}</span>
-                                                    </td>
-                                                    <td class="align-middle text-center text-sm">
-                                                    {% if dataAllUrls['page_components'] is not none %}
-                                                        {% for component in dataAllUrls['page_components'] %}
-                                                        {% if component == 'image' %}
-                                                            <span class="badge badge-sm bg-gradient-success">Image(s)</span>
-                                                        {% elif component == 'video' %}
-                                                            <span class="badge badge-sm bg-gradient-success">Video(s)</span>
-                                                        {% elif component == 'audio' %}
-                                                            <span class="badge badge-sm bg-gradient-success">Audio(s)</span>
-                                                        {% elif component == 'table' %}
-                                                            <span class="badge badge-sm bg-gradient-success">Tableau(s)</span>
-                                                        {% elif component == 'cadre' %}
-                                                            <span class="badge badge-sm bg-gradient-success">Cadre(s)</span>
-                                                        {% elif component == 'formulaire' %}
-                                                            <span class="badge badge-sm bg-gradient-success">Autre Formulaire(s)</span>
-                                                        {% elif component == 'Recherche' %}
-                                                            <span class="badge badge-sm bg-gradient-success">Form Recherche</span>
-                                                        {% elif component == 'citation' %}
-                                                            <span class="badge badge-sm bg-gradient-success">Citation(s)</span>
-                                                        {% elif component is mapping and 'pdf_count' in component %}
-                                                            <span class="badge sr-only">PDF</span>                                      
-                                                            <span class="badge badge-sm bg-gradient-success">PDF: {{ component['pdf_count'] }}</span>
-                                                        {% endif %}
-                                                        {% endfor %}
+
+                                    {% for page_name in desired_page_names %}
+                                    {% set found = [] %}
+
+                                        <tr class="tr-all-pages">
+                                            <td>
+                                                {% for dataAllUrls in data['all_urls'] %}
+                                                    {% if dataAllUrls['page_type'] is not none and dataAllUrls['page_type'] == page_name %}
+                                                    <input type="checkbox" class="rowCheckbox"><br>
                                                     {% endif %}
-                                                    </td>
-                                            </tr>
-                                            <!-- <tr>
-                                                <div class="bg-light text-center rounded p-3 mt-3">
-                                                    Pas de données
-                                                </div>
-                                            </tr> -->
-                                        {% endif %}
+                                                {% endfor %}
+                                            </td>
+                                            <td>
+                                                {% for dataAllUrls in data['all_urls'] %}
+                                                    {% if dataAllUrls['page_type'] is not none and dataAllUrls['page_type'] == page_name %}
+                                                        <div class="d-flex px-2">
+                                                            <div class="my-auto">
+                                                                <a class="lien-page mb-0 text-sm" href="{{ dataAllUrls['absolute_url'] }}" target="_blank">
+                                                                    {{ dataAllUrls['absolute_url'] }}
+                                                                    <i class="fas fa-external-link-alt"></i>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                        {% if found.append(1) %}{% endif %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {% if not found|length %}
+                                                    <span class="text-danger">Introuvable</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <p class="text-sm font-weight-bold mb-0">{{ page_name }}</p>
+                                            </td>
+                                            <td class="align-middle text-center text-sm">
+                                                {% for dataAllUrls in data['all_urls'] %}
+                                                    {% if dataAllUrls['page_type'] is not none and dataAllUrls['page_type'] == page_name %}
+                                                    <span class="badge sr-only">Page obligatoire</span>
+                                                        {% if dataAllUrls['page_components'] is not none %}
+                                                            {% for component in dataAllUrls['page_components'] %}
+                                                                {% if component == 'image' %}
+                                                                <span class="badge badge-sm bg-gradient-success">Images(s)</span>
+                                                                {% elif component == 'video' %}
+                                                                <span class="badge badge-sm bg-gradient-success">Video(s)</span>
+                                                                {% elif component == 'audio' %}
+                                                                <span class="badge badge-sm bg-gradient-success">Audio(s)</span>
+                                                                {% elif component == 'table' %}
+                                                                <span class="badge badge-sm bg-gradient-success">Tableau(s)</span>
+                                                                {% elif component == 'cadre' %}
+                                                                <span class="badge badge-sm bg-gradient-success">Cadre(s)</span>
+                                                                {% elif component == 'formulaire' %}
+                                                                <span class="badge badge-sm bg-gradient-success">Autre Formulaire(s)</span>
+                                                                {% elif component == 'Recherche' %}
+                                                                <span class="badge badge-sm bg-gradient-success">Form Recherche</span>
+                                                                {% elif component == 'citation' %}
+                                                                <span class="badge badge-sm bg-gradient-success">Citation(s)</span>
+                                                                {% elif component is mapping and 'pdf_count' in component %}
+                                                                <span class="badge sr-only">PDF</span>
+                                                                <span class="badge badge-sm bg-gradient-success">PDF: {{ component['pdf_count'] }}</span>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                        <hr>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </td>
+                                        </tr>
                                     {% endfor %}
+
                                 </tbody>
                             </table>
                             
@@ -392,26 +402,26 @@
                                             <td class="align-middle text-center text-sm">
                                                 {% if dataAllUrls['page_components'] is not none %}
                                                 {% for component in dataAllUrls['page_components'] %}
-                                                {% if component == 'image' %}
-                                                <span class="badge badge-sm bg-gradient-success">Images(s)</span>
-                                                {% elif component == 'video' %}
-                                                <span class="badge badge-sm bg-gradient-success">Video(s)</span>
-                                                {% elif component == 'audio' %}
-                                                <span class="badge badge-sm bg-gradient-success">Audio(s)</span>
-                                                {% elif component == 'table' %}
-                                                <span class="badge badge-sm bg-gradient-success">Tableau(s)</span>
-                                                {% elif component == 'cadre' %}
-                                                <span class="badge badge-sm bg-gradient-success">Cadre(s)</span>
-                                                {% elif component == 'formulaire' %}
-                                                <span class="badge badge-sm bg-gradient-success">Autre Formulaire(s)</span>
-                                                {% elif component == 'Recherche' %}
-                                                <span class="badge badge-sm bg-gradient-success">Form Recherche</span>
-                                                {% elif component == 'citation' %}
-                                                <span class="badge badge-sm bg-gradient-success">Citation(s)</span>
-                                                {% elif component is mapping and 'pdf_count' in component %}
-                                                <span class="badge sr-only">PDF</span>
-                                                <span class="badge badge-sm bg-gradient-success">PDF: {{ component['pdf_count'] }}</span>
-                                                {% endif %}
+                                                    {% if component == 'image' %}
+                                                    <span class="badge badge-sm bg-gradient-success">Images(s)</span>
+                                                    {% elif component == 'video' %}
+                                                    <span class="badge badge-sm bg-gradient-success">Video(s)</span>
+                                                    {% elif component == 'audio' %}
+                                                    <span class="badge badge-sm bg-gradient-success">Audio(s)</span>
+                                                    {% elif component == 'table' %}
+                                                    <span class="badge badge-sm bg-gradient-success">Tableau(s)</span>
+                                                    {% elif component == 'cadre' %}
+                                                    <span class="badge badge-sm bg-gradient-success">Cadre(s)</span>
+                                                    {% elif component == 'formulaire' %}
+                                                    <span class="badge badge-sm bg-gradient-success">Autre Formulaire(s)</span>
+                                                    {% elif component == 'Recherche' %}
+                                                    <span class="badge badge-sm bg-gradient-success">Form Recherche</span>
+                                                    {% elif component == 'citation' %}
+                                                    <span class="badge badge-sm bg-gradient-success">Citation(s)</span>
+                                                    {% elif component is mapping and 'pdf_count' in component %}
+                                                    <span class="badge sr-only">PDF</span>
+                                                    <span class="badge badge-sm bg-gradient-success">PDF: {{ component['pdf_count'] }}</span>
+                                                    {% endif %}
                                                 {% endfor %}
                                                 {% endif %}
                                             </td>

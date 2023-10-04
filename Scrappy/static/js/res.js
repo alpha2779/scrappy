@@ -212,14 +212,38 @@ function getSelectedRowsData(buttonElement) {
     }
 
     const selectedRows = [];
-    section.querySelectorAll('.rowCheckbox:checked').forEach(checkbox => {
-        const row = checkbox.closest('.tr-all-pages');
-        const url = row.querySelector('.lien-page').textContent.trim();
+    section.querySelectorAll('.tr-all-pages').forEach(row => {
+        const checkboxes = Array.from(row.querySelectorAll('.rowCheckbox'));
+        const links = Array.from(row.querySelectorAll('.lien-page'));
         const pageName = row.cells[2].textContent.trim();
-        const componentsList = Array.from(row.cells[3].querySelectorAll('span')).map(span => span.textContent.trim());
-        const components = componentsList.join(', ');
 
-        selectedRows.push({ url, pageName, components });
+        checkboxes.forEach((checkbox, index) => {
+            if (checkbox.checked) {
+                const url = links[index].textContent.trim();
+
+                // Collecting components associated with the selected link
+                const componentsContainer = row.cells[3];
+
+                if(componentsContainer.querySelector('hr')) {
+                    // Case with <hr>
+                    const componentsSets = Array.from(componentsContainer.querySelectorAll('span, hr')).reduce((sets, el) => {
+                        if (el.tagName.toLowerCase() === 'hr' || !sets.length) {
+                            sets.push([]);
+                        } else {
+                            sets[sets.length - 1].push(el.textContent.trim());
+                        }
+                        return sets;
+                    }, []);
+                    const components = componentsSets[index] ? componentsSets[index].join(', ') : '';
+                    selectedRows.push({ url, pageName, components });
+                } else {
+                    // Case without <hr>
+                    const componentsList = Array.from(componentsContainer.querySelectorAll('span')).map(span => span.textContent.trim());
+                    const components = componentsList.join(', ');
+                    selectedRows.push({ url, pageName, components });
+                }
+            }
+        });
     });
 
     return {
@@ -227,6 +251,7 @@ function getSelectedRowsData(buttonElement) {
         rows: selectedRows
     };
 }
+
 
 function populateConfirmationModal(data) {
     const table = document.getElementById('confirmationTable');
@@ -305,7 +330,7 @@ function sendDataToServer(data, section) {
         link.href = window.URL.createObjectURL(blob);
         link.download = "output.xlsx";
         link.click();
-        uncheckSelectedRows();
+        uncheckSelectedRows(section);
         closeModal();
         resetCounterForSection(section);
     })
