@@ -11,27 +11,39 @@
 </head>
 <body>
     <header class="top-bar-container" role="banner">
-        <div class="bottom-bar">
+      <div class="bottom-bar">
           <div class="_26NNk cust-container">
-            <h1 class="tit-h1">Scrappy</h1>
-            <span>by</span>
-            <img class="logo-image" src="{{ url_for('static',filename='images/logo-ipedis.svg') }}" alt="Logo de Ipedis">
+              <h1 class="tit-h1">Scrappy</h1>
+              <span>by</span>
+              <img class="logo-image" src="{{ url_for('static',filename='images/logo-ipedis.svg') }}" alt="Logo de Ipedis">
           </div>
+
+          
+
           <div class="right-content">
-            <div class="dropdown custom-dropdown">
-              <a href="#" data-toggle="dropdown" class="d-flex align-items-center dropdown-link" aria-haspopup="true" aria-expanded="false" data-offset="-140, 12">
-                <div class="profile-pic">
-                    <span class="icon">{{ current_user.username[0].capitalize() }}</span>
-                </div>
-              </a>
-              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 70px, 0px);">
-                <span class="dropdown-item" href="#">{{ current_user.username }}</span>
-                <a class="dropdown-item" href="{{ url_for('auth.logout') }}">Se déconnecter</a>
+            <!-- Begin Navigation Bar -->
+              <nav class="nav-bar">
+                <ul class="nav-list">
+                    <li class="nav-item main-nav-item"><a href="{{ url_for('index.index') }}" class="nav-link">Nouvel Échantillon</a></li>
+                    <li class="nav-item main-nav-item"><a href="{{ url_for('sample_history.history') }}" class="nav-link">Historique</a></li>
+                </ul>
+            </nav>
+            <!-- End Navigation Bar -->
+              <div class="dropdown custom-dropdown">
+                  <a href="#" data-toggle="dropdown" class="d-flex align-items-center dropdown-link" aria-haspopup="true" aria-expanded="false" data-offset="-140, 12">
+                      <div class="profile-pic">
+                          <span class="icon">{{ current_user.username[0].capitalize() }}</span>
+                      </div>
+                  </a>
+                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 70px, 0px);">
+                      <span class="dropdown-item" href="#">{{ current_user.username }}</span>
+                      <a class="dropdown-item" href="{{ url_for('auth.logout') }}">Se déconnecter</a>
+                  </div>
               </div>
-            </div>
           </div>
-        </div>
-    </header>
+      </div>
+  </header>
+
 
     <!-- Content section -->
     {% block content %}
@@ -40,7 +52,7 @@
     <footer class="footer" role="contentinfo">
         <div class="footer__bottom container-custom">
           <img loading="lazy" class="footer__logo loading" src="{{ url_for('static',filename='images/logo-blanc.svg') }}" alt="Logo Ipedis">
-          <span class="footer-text" class="footer__list">Powered by Team Conseil V1.2</span>
+          <span class="footer-text" class="footer__list">Powered by Team Conseil V2</span>
         </div>
     </footer>
 

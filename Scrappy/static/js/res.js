@@ -215,14 +215,14 @@ function getSelectedRowsData(buttonElement) {
     section.querySelectorAll('.tr-all-pages').forEach(row => {
         const checkboxes = Array.from(row.querySelectorAll('.rowCheckbox'));
         const links = Array.from(row.querySelectorAll('.lien-page'));
-        const pageName = row.cells[2].textContent.trim();
+        const pageName = row.querySelector('.page-name').textContent.trim();
 
         checkboxes.forEach((checkbox, index) => {
             if (checkbox.checked) {
                 const url = links[index].textContent.trim();
 
                 // Collecting components associated with the selected link
-                const componentsContainer = row.cells[3];
+                const componentsContainer = row.querySelector('.all-components');
 
                 if(componentsContainer.querySelector('hr')) {
                     // Case with <hr>
@@ -345,3 +345,132 @@ function closeModal() {
     const closeButton = document.querySelector('[data-dismiss="modal"]');
     if (closeButton) closeButton.click();
 }
+
+function submitURL() {
+    const url = document.getElementById('urlInput').value.trim(); // Added trim to remove any leading/trailing spaces
+
+    // If the URL is empty, return early
+    if (!url) {
+        console.warn('URL input is empty. Exiting.');
+        return;
+    }
+
+    // Show loader
+    document.querySelector('.loader').style.display = 'flex';
+
+    // Using Fetch API to send a POST request
+    fetch('/scan/single/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 'url': url })
+    })
+    .then(response => response.json())
+    .then(data => {
+        addRowToTable(data); // Assuming you only get one result for a single URL
+        // Hide loader
+        document.querySelector('.loader').style.display = 'none';
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        // Hide loader
+        document.querySelector('.loader').style.display = 'none';
+    });
+}
+
+document.getElementById('validerBtn').disabled = true;
+
+function clearModalTable() {
+    document.querySelector('#urlModal #add-page-table').innerHTML = '';
+    // Again, disable the "Valider" button since the table is empty now
+    document.getElementById('validerBtn').disabled = true;
+}
+
+function addRowToTable(row) {
+    const table = document.getElementById('add-page-table');
+    table.innerHTML = ''; // Clear table
+
+    const thead = document.createElement('thead');
+    thead.classList.add('thead-side-color');
+
+    const headerRow = document.createElement('tr');
+    const columns = ['URL', 'Nom de la page', 'Composants'];
+
+    columns.forEach(col => {
+        const th = document.createElement('th');
+        th.textContent = col;
+        headerRow.appendChild(th);
+    });
+
+    const tbody = document.createElement('tbody');
+
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    table.appendChild(tbody);
+    
+    const tr = document.createElement('tr');
+    tr.classList.add('tr-all-pages');
+
+    const tdUrl = document.createElement('td');
+    tdUrl.innerHTML = `<a class="lien-page mb-0 text-sm" href="${row.absolute_url}" target="_blank">${row.absolute_url} <i class="fas fa-external-link-alt"></i></a>`;
+    tr.appendChild(tdUrl);
+
+    const tdPageName = document.createElement('td');
+    const p = document.createElement('p');
+    p.classList.add('text-sm', 'font-weight-bold', 'mb-0');
+    p.textContent = row.page_title;
+    tdPageName.appendChild(p);
+    tr.appendChild(tdPageName);
+
+    const tdComponents = document.createElement('td');
+    tdComponents.innerHTML = row.page_components.map(comp => `<span class="badge badge-sm bg-gradient-success">${comp}</span>`).join(' ');
+    tr.appendChild(tdComponents);
+
+    tbody.appendChild(tr);
+
+    document.getElementById('validerBtn').disabled = false;
+}
+let currentRowId;  // This will store the data-id of the clicked "Add" button
+
+document.querySelectorAll('.addBtn').forEach(button => {
+    button.addEventListener('click', function() {
+        currentRowId = this.getAttribute('data-id');
+    });
+});
+
+document.getElementById('validerBtn').addEventListener('click', function() {
+    if (currentRowId) {
+        // Retrieve data from the modal's table
+        let rowData = {};
+
+        let trs = document.querySelectorAll('.tr-all-pages');
+        trs.forEach(tr => {
+            rowData.url = tr.querySelector('.lien-page');
+            rowData.page_components = Array.from(tr.querySelectorAll('td:nth-child(4) .badge')).map(el => el.textContent.trim());
+        });
+
+        // Inject the data into the corresponding row in the main table
+        let targetRow = document.querySelector(`[data-id="${currentRowId}"]`).closest('tr');
+
+        // Assuming 2nd <td> is for the URL and 3rd <td> is for the page name and 4th <td> is for components
+        targetRow.querySelector('td:nth-child(3)').innerHTML = `<a class="lien-page mb-0 text-sm" href="${rowData.url}" target="_blank">${rowData.url} <i class="fas fa-external-link-alt"></i></a>`;
+        
+        targetRow.querySelector('td:nth-child(5)').innerHTML = rowData.page_components.map(comp => `<span class="badge badge-sm bg-gradient-success">${comp}</span>`).join(' ');
+
+        // After data from modal is added to table
+        // Locate the row based on currentRow
+        const rowToUpdate = document.querySelector(`[data-id="${currentRowId}"]`).parentNode.parentNode;
+        
+        // Add checkbox or show checkbox in the row
+        const checkboxCell = rowToUpdate.children[1];  // the second TD in the row
+        const checkbox = checkboxCell.querySelector('.rowCheckbox');
+        checkbox.style.display = "grid"; // or you can do checkbox.removeAttribute('hidden');
+
+        // Clear the modal table
+        clearModalTable();
+
+        // Close the modal
+        $('#urlModal').modal('hide');
+    }
+});

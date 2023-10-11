@@ -1,10 +1,12 @@
 # app/routes/scan.py
-from flask import Blueprint, redirect, render_template, request, url_for, send_from_directory
-from flask_login import login_required
+from flask import Blueprint, redirect, render_template, request, url_for, send_from_directory, jsonify
+from flask_login import login_required, current_user
 from app.models.website_scanner import WebsiteScanner
 from openpyxl import Workbook, load_workbook
 from pathlib import Path
 from datetime import datetime
+from app.models.website import Website
+from app.models.sample import Sample
 
 bp = Blueprint('scan', __name__)
 
@@ -12,13 +14,10 @@ bp = Blueprint('scan', __name__)
 @login_required
 def scan():
     if request.method == "GET":
-        # Redirect them to the homepage or wherever you'd like
         return redirect(url_for('index.index'))
 
     form_data = request.form.to_dict()
     values_list = list(form_data.values())
-
-    # Remove duplicates from values_list
     values_list = list(set(values_list))
 
     scanner = WebsiteScanner(values_list)
@@ -27,12 +26,19 @@ def scan():
     urlResults = scanner.get_urls()
     total_results = len(urlResults)
     total_pages = sum(int(data['page_count']) for data in urlResults)
-    average_pages_per_result = total_pages / \
-        total_results if total_results > 0 else 0
+    average_pages_per_result = total_pages / total_results if total_results > 0 else 0
 
-    print("This is the sum of the page count...", total_pages)
-    print("This is the total results...", total_results)
-    print("This is the average", average_pages_per_result)
+    # # Store website and sample data in the database
+    # for result in urlResults:
+    #     # Check if website already exists
+    #     website = Website.query.filter_by(link=result['url']).first()
+
+    #     # If it doesn't exist, create a new website entry using the provided class method
+    #     if not website:
+    #         website = Website.create(user_id=current_user.id, link=result['url'])
+
+    #     # Add the sample data using the provided class method
+    #     Sample.create(website_id=website.id, sample_data=str(result['all_urls']))
 
     return render_template('res.html',
                            urlResults=urlResults,
@@ -40,11 +46,37 @@ def scan():
                            average_pages_per_result=average_pages_per_result)
 
 
+@bp.route('/scan/single/', methods=["GET", "POST"])
+@login_required
+def scan_single():
+    data = request.json
+    url = data.get('url', '')
+
+    # Validate URL before processing further
+    if not url:
+        return jsonify({"error": "URL not provided"}), 400
+
+    scanner = WebsiteScanner([])
+    result = scanner.scan_single_url(url)
+
+    if result:
+        return jsonify(result)
+    else:
+        return jsonify({"error": "Failed to scan the URL"}), 500
+
+
 
 @bp.route('/scan/generate/', methods=["POST"])
 @login_required
 def generate():
     data = request.json
+
+    if not data:
+        return "No data received", 400
+
+    # Extract the first URL for website link
+    website_link = data[0]['url']
+
     current_dir = Path(__file__).parent
     file_path = current_dir.parent.parent / \
         "resources" / "Desktop_Estimation_CLIENT_SITE_ANNEE.xlsx"
@@ -59,6 +91,16 @@ def generate():
         ws.cell(row=start_row, column=4, value=item['components'])
         # ... Populate other columns as needed
         start_row += 1
+        
+    # Check if website already exists
+    website = Website.query.filter_by(link=website_link).first()
+
+    # If it doesn't exist, create a new website entry using the provided class method
+    if not website:
+        website = Website.create(user_id=current_user.id, link=website_link)
+
+    # Add the sample data using the provided class method
+    Sample.create(website_id=website.id, sample_data=str(data))
 
     # Creating a unique filename with the current date and time
     current_time_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')

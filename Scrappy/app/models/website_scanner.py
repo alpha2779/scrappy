@@ -83,69 +83,33 @@ class WebsiteScanner:
         }
         self.urlResultArray.append(self.urlResults)
 
-    # def scan_url(self, url):
-    #     dataResults = []
-    #     count = 0
+    def scan_single_url(self, url):
+        # Ensure the URL starts with 'http' or 'https'
+        if not url.startswith(("http://", "https://")):
+            url = "https://" + url
 
-    #     # Use tuple for startswith check
-    #     if not url.startswith(("http://", "https://")):
-    #         url = "https://" + url
+        # Use the session to get the content
+        response = self.session.get(url)
 
-    #     # Use the session created during initialization
-    #     response = self.session.get(url)
+        # If successful, create a BeautifulSoup object
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Fetch the necessary details
+            absolute_url = url
+            page_title = soup.title.string if soup.title else "No Title"
+            page_components = self.scan_page_components(url)
+            page_type = self.get_type_page(url)
 
-    #     # Check if the request was successful
-    #     if response.status_code == 200:
-    #         # Process the main provided URL first
-    #         if url not in self.visited_urls:
-    #             self.visited_urls.add(url)
-    #             print('Im here: ', url)
-    #             dataResults.append({
-    #                 'absolute_url': url,
-    #                 'page_title': self.get_page_title(url),
-    #                 'page_components': self.scan_page_components(url),
-    #                 'page_type': self.get_type_page(url)
-    #             })
-    #             count += 1
+            return {
+                'absolute_url': absolute_url,
+                'page_title': page_title,
+                'page_components': page_components,
+                'page_type': page_type
+            }
 
-    #         # Create a BeautifulSoup object to parse the HTML content
-    #         soup = BeautifulSoup(response.content, 'html.parser')
+        return None
 
-    #         # Find all anchor tags on the page
-    #         anchor_tags = soup.find_all('a')
-
-    #         # Extract the href attribute from each anchor tag
-    #         for tag in anchor_tags:
-    #             href = tag.get('href')
-    #             if href and not href.startswith('#'):
-    #                 absolute_url = urljoin(url, href)
-    #                 # Check if the absolute URL belongs to the website being scanned
-    #                 if self.is_same_website(url, absolute_url) and absolute_url not in self.visited_urls:
-    #                     self.visited_urls.add(absolute_url)
-    #                     print('Im here: ', absolute_url)
-    #                     # Check if the href value is already in the set, skip if it's a duplicate
-    #                     if href in self.href_set:
-    #                         continue
-
-    #                     # Add the href value to the set
-    #                     self.href_set.add(href)
-
-    #                     # Process the anchor tag
-    #                     dataResults.append({
-    #                         'absolute_url': absolute_url,
-    #                         'page_title': self.get_page_title(absolute_url),
-    #                         'page_components': self.scan_page_components(absolute_url),
-    #                         'page_type': self.get_type_page(absolute_url)
-    #                     })
-    #                     count += 1
-
-    #     # Add the result of count_pages function to urlResults
-    #     self.urlResults = {
-    #         'url': url,
-    #         'page_count': count,
-    #         'all_urls': dataResults
-    #     }
-    #     self.urlResultArray.append(self.urlResults)
 
     def is_same_website(self, base_url, absolute_url):
         # Parse the base URL and the absolute URL

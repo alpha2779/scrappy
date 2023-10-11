@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}History - Scrappy{% endblock %}
+
+{% block content %}
+
+  <main class="content" role="main">
+    <ul class="nav nav-pills" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" data-toggle="pill" href="#url">Historique</a>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+        <div id="url" class="container tab-pane active">
+
+          <!-- Search and Filter -->
+          <div class="filters">
+            <input type="text" placeholder="Search..." />
+            <select name="date_filter">
+                <option value="all">All Dates</option>
+                <option value="last_month">Last Month</option>
+                <!-- Add more options as needed -->
+            </select>
+          </div>
+            
+            <table id="custom-table" class="table table-hover table-bordered">
+                <thead class="thead-side-color">
+                    <tr>
+                        <th class="text-uppercase text-white font-weight-bolder">ID</th>
+                        <th class="text-uppercase text-white font-weight-bolder">Echantillon</th>
+                        <th class="text-uppercase text-white font-weight-bolder ps-2">Date</th>
+                        <th class="text-uppercase text-white font-weight-bolder">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                  {% for website in websites %}
+                  <tr>
+                      <td>{{ website.id }}</td>
+                      <td>
+                          <a href="{{ website.link }}" target="_blank">{{ website.link }}</a>
+                      </td>
+                      <td>{{ website.date_added.strftime('%d %B %Y at %I:%M %p') }}</td>
+                      <td>
+                          <a href="{{ url_for('sample_history.history', id=website.id) }}">Details</a> |
+                          <a href="{{ url_for('sample_history.history', id=website.id) }}">Rescan</a>
+                      </td>
+                  </tr>
+                  {% endfor %}
+              </tbody>
+            </table>
+            
+        </div>
+    </div>    
+  </main>
+{% endblock %}
+
+{% block script %}
+<script>
+ 
+</script>
+{% endblock %}
+

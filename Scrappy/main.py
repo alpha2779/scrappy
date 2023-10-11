@@ -2,6 +2,7 @@ from app.routes.index import bp as index_bp
 from app.routes.scan import bp as scan_bp
 from app.routes.scan_multiple import bp as scan_multiple_bp
 from app.routes.auth import bp as auth_bp
+from app.routes.sample_history_routes import bp as sample_history_bp
 from flask import Flask
 from app.models.user import db
 from app.routes.auth import bcrypt, login_manager
@@ -18,9 +19,11 @@ app.register_blueprint(index_bp)
 app.register_blueprint(scan_bp)
 app.register_blueprint(scan_multiple_bp)
 app.register_blueprint(auth_bp)
+app.register_blueprint(sample_history_bp)
+
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=False, host="0.0.0.0", port=3000)
-    # app.run(debug=True)
+    # app.run(debug=False, host="0.0.0.0", port=3000)
+    app.run(debug=True)
