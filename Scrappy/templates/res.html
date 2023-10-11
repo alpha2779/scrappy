@@ -29,7 +29,7 @@
                     <div class="mb-3">
                         <!-- Added icon for button -->
                         <button onclick="return confirmScanAgain();" class="btn-new-scan">
-                            <i class="fas fa-plus-circle"></i> Nouveau scan
+                            <i class="fas fa-plus-circle"></i> Nouvel Échantillon
                         </button>
                     </div>
             
@@ -73,21 +73,34 @@
                             color: #555;
                         ">Powered by <span style="color: #0f8570;">Team Conseil</span></div>
 
-
-                        <!-- Profile Section -->
-                        <div class="right-content d-flex justify-content-end">
-                            <div class="dropdown custom-dropdown">
-                                <a href="#" data-toggle="dropdown" class="d-flex align-items-center dropdown-link" aria-haspopup="true" aria-expanded="false" data-offset="-140, 12">
-                                    <div class="profile-pic">
-                                        <span class="icon">{{ current_user.username[0].capitalize() }}</span>
+                            
+                            <!-- Profile Section -->
+                            <div class="right-content d-flex justify-content-end">
+                                <!-- Begin Navigation Bar -->
+                                <nav class="nav-bar">
+                                    <ul class="nav-list">
+                                        <li class="nav-item main-nav-item">
+                                            <a href="{{ url_for('sample_history.history') }}" 
+                                            class="nav-link {{ 'nav-link-active' if current_endpoint == 'sample_history.history' else '' }}">
+                                            Historique
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>                
+                                <!-- End Navigation Bar -->
+                                <div class="dropdown custom-dropdown">
+                                    <a href="#" data-toggle="dropdown" class="d-flex align-items-center dropdown-link" aria-haspopup="true" aria-expanded="false" data-offset="-140, 12">
+                                        <div class="profile-pic">
+                                            <span class="icon">{{ current_user.username[0].capitalize() }}</span>
+                                        </div>
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 70px, 0px);">
+                                        <span class="dropdown-item" href="#">{{ current_user.username }}</span>
+                                        <a class="dropdown-item" href="{{ url_for('auth.logout') }}">Se déconnecter</a>
                                     </div>
-                                </a>
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 70px, 0px);">
-                                    <span class="dropdown-item" href="#">{{ current_user.username }}</span>
-                                    <a class="dropdown-item" href="{{ url_for('auth.logout') }}">Se déconnecter</a>
                                 </div>
                             </div>
-                        </div>
+                        
                     </div>
                 </div>
 
@@ -453,7 +466,7 @@
 
     <!-- Modal -->
     <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-dialog-centered modal-side-validate" role="document">
         <div class="modal-content">
             <div class="modal-header">
             <h5 class="modal-title">Valider l'échantillon</h5>
@@ -477,7 +490,7 @@
     </div>
 
     <div class="modal fade" id="urlModal" tabindex="-1" role="dialog" aria-labelledby="urlModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-side">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="urlModalLabel">Ajouter Une Page</h5>
@@ -517,7 +530,7 @@
     </div>
     
 
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"></script>
     <script src="{{ url_for('static',filename='js/loading-messages.js') }}"></script>

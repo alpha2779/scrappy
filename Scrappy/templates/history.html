@@ -27,7 +27,6 @@
             <table id="custom-table" class="table table-hover table-bordered">
                 <thead class="thead-side-color">
                     <tr>
-                        <th class="text-uppercase text-white font-weight-bolder">ID</th>
                         <th class="text-uppercase text-white font-weight-bolder">Echantillon</th>
                         <th class="text-uppercase text-white font-weight-bolder ps-2">Date</th>
                         <th class="text-uppercase text-white font-weight-bolder">Action</th>
@@ -36,14 +35,13 @@
                 <tbody>
                   {% for website in websites %}
                   <tr>
-                      <td>{{ website.id }}</td>
                       <td>
                           <a href="{{ website.link }}" target="_blank">{{ website.link }}</a>
                       </td>
                       <td>{{ website.date_added.strftime('%d %B %Y at %I:%M %p') }}</td>
                       <td>
-                          <a href="{{ url_for('sample_history.history', id=website.id) }}">Details</a> |
-                          <a href="{{ url_for('sample_history.history', id=website.id) }}">Rescan</a>
+                        <a href="#" data-id="{{ website.id }}" class="details-link" data-toggle="modal" data-target="#urlModal">Details</a>
+                        <a href="{{ url_for('sample_history.history', id=website.id) }}">Rescan</a>
                       </td>
                   </tr>
                   {% endfor %}
@@ -53,11 +51,86 @@
         </div>
     </div>    
   </main>
+
+  <div class="modal fade" id="urlModal" tabindex="-1" role="dialog" aria-labelledby="urlModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-side">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="urlModalLabel">Échantillon</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="clearModalTable()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table id="add-page-table" class="table table-hover table-bordered">
+                    <!-- The table to display selected rows will be dynamically populated using JS -->
+                </table>
+            </div>                
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block script %}
 <script>
- 
+  $(document).ready(function() {
+      $('.details-link').click(function() {
+          const websiteId = $(this).data('id');  // get website ID from data attribute
+
+          // Make AJAX request to get sample_data
+          fetch(`/history/${websiteId}`)
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error('Network response was not ok');
+              }
+              return response.text();
+          })
+          .then(data => {
+            populateModal(JSON.parse(data));
+          })
+          .catch(err => {
+              console.error("Error fetching or parsing data:", err);
+          });
+
+      });
+  });
+
+  function populateModal(data) {
+    // Build table header
+    let content = `
+        <thead class="thead-side-color">
+            <tr>
+                <th>URL</th>
+                <th>Page Name</th>
+                <th>Components</th>
+            </tr>
+        </thead>
+        <tbody>
+    `;
+    // Populate table rows
+    data.forEach(row => {
+      let componentsBadges = row.components.split(',').map(comp => {
+        return `<span class="badge badge-sm bg-gradient-success">${comp.trim()}</span>`;
+      }).join(' ');
+        content += `
+            <tr class="tr-all-pages">
+                <td><a href="${row.url}" target="_blank">${row.url}</a></td>
+                <td>${row.pageName}</td>
+                <td>${componentsBadges}</td>
+            </tr>
+        `;
+    });
+
+    content += '</tbody>';
+
+    // Append the content to the modal's table
+    $('#add-page-table').empty().append(content);
+}
+
+
 </script>
 {% endblock %}
 
