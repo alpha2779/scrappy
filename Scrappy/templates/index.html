@@ -12,10 +12,22 @@
       <li class="nav-item">
         <a class="nav-link" data-toggle="pill" href="#multiple-urls">Plusieurs URLs</a>
       </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="pill" href="#manual-url">Manuel</a>
+      </li>
     </ul>
 
     <div class="tab-content">
       <div id="url" class="container tab-pane active">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class="flashes alert alert-danger" role="alert">
+                        {% for category, message in messages %}
+                            <li class="li-flashes {{ category }}">Une erreur s'est produite lors de l'analyse de l'URL</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %} 
         <form method="POST" action="/scan" onsubmit="showLoading()">
           <div id="hosts-container">
             <div class="form-group">
@@ -41,6 +53,19 @@
             <small id="emailHelp" class="form-text text-muted">Entrez plusieurs URL séparées par une nouvelle ligne</small>
           </div>
           <button id="scan-btn" type="submit" class="btn btn-primary">Scanner</button>
+        </form>
+      </div>
+
+      <div id="manual-url" class="container tab-pane fade">
+        <form method="POST" action="/scan-manual" onsubmit="showLoading()">
+          <div id="hosts-container">
+            <div class="form-group">
+              <label for="hosts">Url</label>
+              <input type="text" class="form-control" placeholder="example.com" name="url" id="hosts" required>
+              <small id="emailHelp" class="form-text text-muted">Entrez un nom d'hôte ou une adresse IP.</small>
+            </div>
+          </div>
+          <button id="scan-btn" type="submit" class="btn btn-primary">Suivant</button>
         </form>
       </div>
     </div>

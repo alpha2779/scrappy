@@ -5,24 +5,30 @@
 {% block content %}
 
   <main class="content" role="main">
-    <ul class="nav nav-pills" role="tablist">
-      <li class="nav-item">
-        <a class="nav-link active" data-toggle="pill" href="#url">Historique</a>
-      </li>
-    </ul>
-
-    <div class="tab-content">
-        <div id="url" class="container tab-pane active">
+    <div class="history-content">
+        <div id="url" class="container">
 
           <!-- Search and Filter -->
-          <div class="filters">
-            <input type="text" placeholder="Search..." />
-            <select name="date_filter">
-                <option value="all">All Dates</option>
-                <option value="last_month">Last Month</option>
-                <!-- Add more options as needed -->
-            </select>
-          </div>
+            <div class="filters my-1">
+                <form class="form-inline d-flex">
+                    <div class="form-group mr-3">
+                        <label for="urlSearch" class="d-block">URL:</label>
+                        <input type="text" class="form-control" id="urlSearch" placeholder="Search by URL">
+                    </div>
+            
+                    <div class="form-group mr-3">
+                        <label for="startDate" class="d-block">From:</label>
+                        <input type="date" class="form-control" id="startDate">
+                    </div>
+            
+                    <div class="form-group mr-3">
+                        <label for="endDate" class="d-block">To:</label>
+                        <input type="date" class="form-control" id="endDate">
+                    </div>
+            
+                    <button id="btn-search" type="button" class="btn btn-primary ml-auto" onclick="fetchData()">Rechercher</button>
+                </form>
+            </div>
             
             <table id="custom-table" class="table table-hover table-bordered">
                 <thead class="thead-side-color">
@@ -35,18 +41,43 @@
                 <tbody>
                   {% for website in websites %}
                   <tr>
+                    
                       <td>
-                          <a href="{{ website.link }}" target="_blank">{{ website.link }}</a>
+                        <div class="d-flex px-2">
+                            <div class="my-auto">
+                                <a class="lien-page mb-0 text-sm" href="{{ website.link }}" target="_blank">
+                                    {{ website.link }}
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                        </div>
                       </td>
                       <td>{{ website.date_added.strftime('%d %B %Y at %I:%M %p') }}</td>
                       <td>
                         <a href="#" data-id="{{ website.id }}" class="details-link" data-toggle="modal" data-target="#urlModal">Details</a>
-                        <a href="{{ url_for('sample_history.history', id=website.id) }}">Rescan</a>
+                        <!-- <a href="{{ url_for('sample_history.history', id=website.id) }}">Rescan</a> -->
                       </td>
                   </tr>
                   {% endfor %}
               </tbody>
             </table>
+
+            <nav>
+                <ul class="pagination">
+                    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('sample_history.history', page=pagination.prev_num) }}">Previous</a>
+                    </li>
+                    {% for page_num in pagination.iter_pages() %}
+                        <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('sample_history.history', page=page_num) }}">{{ page_num }}</a>
+                        </li>
+                    {% endfor %}
+                    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('sample_history.history', page=pagination.next_num) }}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+            
             
         </div>
     </div>    
@@ -56,12 +87,22 @@
     <div class="modal-dialog modal-dialog-centered modal-side">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="urlModalLabel">Échantillon</h5>
+                <h5 class="modal-title" id="urlModalLabel" style="
+                font-size: 23px;
+                line-height: 32px;
+                font-weight: 500;
+                margin: 0;
+                color: #2d2b6a;">Échantillon: </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="clearModalTable()">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
+                <ul class="list-group">
+                    <li class="list-group-item" id="website-name">Website:</li>
+                    <li class="list-group-item" id="website-date">Date:</li>
+                    <li class="list-group-item" id="website-username">Consultant:</li>
+                </ul>                
                 <table id="add-page-table" class="table table-hover table-bordered">
                     <!-- The table to display selected rows will be dynamically populated using JS -->
                 </table>
@@ -76,6 +117,14 @@
 
 {% block script %}
 <script>
+    function fetchData() {
+    const urlSearch = document.getElementById('urlSearch').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+
+    window.location.href = `/history?url=${urlSearch}&start_date=${startDate}&end_date=${endDate}`;
+    }
+
   $(document).ready(function() {
       $('.details-link').click(function() {
           const websiteId = $(this).data('id');  // get website ID from data attribute
@@ -99,6 +148,12 @@
   });
 
   function populateModal(data) {
+    // Update website information in the list
+    $('#urlModalLabel').text(`Échantillon: ${data.website.name}`);
+    $('#website-name').text(`Website: ${data.website.name}`);
+    $('#website-date').text(`Date: ${data.website.date || "N/A"}`);  // Assuming date is in the website data
+    $('#website-username').text(`Consultant: ${data.website.username}`);
+    
     // Build table header
     let content = `
         <thead class="thead-side-color">
@@ -111,13 +166,22 @@
         <tbody>
     `;
     // Populate table rows
-    data.forEach(row => {
+    data.sample_data.forEach(row => {
       let componentsBadges = row.components.split(',').map(comp => {
         return `<span class="badge badge-sm bg-gradient-success">${comp.trim()}</span>`;
       }).join(' ');
         content += `
             <tr class="tr-all-pages">
-                <td><a href="${row.url}" target="_blank">${row.url}</a></td>
+                <td>
+                    <div class="d-flex px-2">
+                            <div class="my-auto">
+                                <a class="lien-page mb-0 text-sm" href="${row.url}" target="_blank">
+                                    ${row.url}
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </td>
                 <td>${row.pageName}</td>
                 <td>${componentsBadges}</td>
             </tr>

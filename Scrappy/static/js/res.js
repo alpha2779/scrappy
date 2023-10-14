@@ -216,10 +216,13 @@ function getSelectedRowsData(buttonElement) {
         const checkboxes = Array.from(row.querySelectorAll('.rowCheckbox'));
         const links = Array.from(row.querySelectorAll('.lien-page'));
         const pageName = row.querySelector('.page-name').textContent.trim();
+        const complexity = Array.from(row.querySelectorAll('.complexity-dropdown'));
 
         checkboxes.forEach((checkbox, index) => {
             if (checkbox.checked) {
                 const url = links[index].textContent.trim();
+                const comp = complexity[index].value;
+                console.log(complexity[index].value);
 
                 // Collecting components associated with the selected link
                 const componentsContainer = row.querySelector('.all-components');
@@ -235,12 +238,12 @@ function getSelectedRowsData(buttonElement) {
                         return sets;
                     }, []);
                     const components = componentsSets[index] ? componentsSets[index].join(', ') : '';
-                    selectedRows.push({ url, pageName, components });
+                    selectedRows.push({ url, pageName, components, comp });
                 } else {
                     // Case without <hr>
                     const componentsList = Array.from(componentsContainer.querySelectorAll('span')).map(span => span.textContent.trim());
                     const components = componentsList.join(', ');
-                    selectedRows.push({ url, pageName, components });
+                    selectedRows.push({ url, pageName, components, comp });
                 }
             }
         });
@@ -270,7 +273,7 @@ function populateConfirmationModal(data) {
 
 function createHeaderRow() {
     const headerRow = document.createElement('tr');
-    const columns = ['ID', 'URL', 'Nom de la page', 'Composants'];
+    const columns = ['ID', 'URL', 'Nom de la page', 'Composants', 'Complexité'];
 
     columns.forEach(col => {
         const th = document.createElement('th');
@@ -306,6 +309,10 @@ function createBodyRows(data) {
         const tdComponents = document.createElement('td');
         tdComponents.innerHTML = row.components.split(', ').map(comp => `<span class="badge badge-sm bg-gradient-success">${comp}</span>`).join(' ');
         tr.appendChild(tdComponents);
+
+        const tdComplexity = document.createElement('td');
+        tdComplexity.innerHTML = `<span class="badge badge-sm complexity-dropdown ${row.comp}">${row.comp}</span>`;
+        tr.appendChild(tdComplexity);
 
         tbody.appendChild(tr);
     });
@@ -395,7 +402,7 @@ function addRowToTable(row) {
     thead.classList.add('thead-side-color');
 
     const headerRow = document.createElement('tr');
-    const columns = ['URL', 'Nom de la page', 'Composants'];
+    const columns = ['URL', 'Nom de la page', 'Composants', 'Complexité'];
 
     columns.forEach(col => {
         const th = document.createElement('th');
@@ -427,6 +434,10 @@ function addRowToTable(row) {
     tdComponents.innerHTML = row.page_components.map(comp => `<span class="badge badge-sm bg-gradient-success">${comp}</span>`).join(' ');
     tr.appendChild(tdComponents);
 
+    const tdComplexity = document.createElement('td');
+    tdComplexity.innerHTML = `<span class="badge badge-sm bg-gradient-success complexity-dropdown ${row.complexity}">${row.complexity}</span>`;
+    tr.appendChild(tdComplexity);
+
     tbody.appendChild(tr);
 
     document.getElementById('validerBtn').disabled = false;
@@ -439,6 +450,13 @@ document.querySelectorAll('.addBtn').forEach(button => {
     });
 });
 
+// Define function to attach event to the button
+function attachButtonEvent(button) {
+    button.addEventListener('click', function() {
+        currentRowId = button.getAttribute('data-id');
+    });
+}
+
 document.getElementById('validerBtn').addEventListener('click', function() {
     if (currentRowId) {
         // Retrieve data from the modal's table
@@ -447,16 +465,26 @@ document.getElementById('validerBtn').addEventListener('click', function() {
         let trs = document.querySelectorAll('.tr-all-pages');
         trs.forEach(tr => {
             rowData.url = tr.querySelector('.lien-page');
-            rowData.page_components = Array.from(tr.querySelectorAll('td:nth-child(4) .badge')).map(el => el.textContent.trim());
+            rowData.page_components = Array.from(tr.querySelectorAll('td:nth-child(3) .badge')).map(el => el.textContent.trim());
+            rowData.complexity = Array.from(tr.querySelectorAll('td:nth-child(4) .badge')).map(el => el.textContent.trim());
         });
 
         // Inject the data into the corresponding row in the main table
         let targetRow = document.querySelector(`[data-id="${currentRowId}"]`).closest('tr');
+        console.log(currentRowId);
 
         // Assuming 2nd <td> is for the URL and 3rd <td> is for the page name and 4th <td> is for components
         targetRow.querySelector('td:nth-child(3)').innerHTML = `<a class="lien-page mb-0 text-sm" href="${rowData.url}" target="_blank">${rowData.url} <i class="fas fa-external-link-alt"></i></a>`;
         
         targetRow.querySelector('td:nth-child(5)').innerHTML = rowData.page_components.map(comp => `<span class="badge badge-sm bg-gradient-success">${comp}</span>`).join(' ');
+
+        targetRow.querySelector('td:nth-child(6)').innerHTML = `
+        <select class="complexity-dropdown ${rowData.complexity} " data-default="${rowData.complexity} ">
+            <option value="ultra-simple" {% if ${rowData.complexity} == 'ultra-simple' %}selected{% endif %}>Ultra Simple</option>
+            <option value="simple" {% if ${rowData.complexity} == 'simple' %}selected{% endif %}>Simple</option>
+            <option value="complexe" {% if ${rowData.complexity} == 'complexe' %}selected{% endif %}>Complexe</option>
+        </select>
+        `;
 
         // After data from modal is added to table
         // Locate the row based on currentRow
@@ -473,4 +501,130 @@ document.getElementById('validerBtn').addEventListener('click', function() {
         // Close the modal
         $('#urlModal').modal('hide');
     }
+});
+
+$('.complexity-dropdown').on('change', function() {
+    switch ($(this).val()) {
+        case 'ultra-simple':
+            $(this).removeClass('simple complexe').addClass('ultra-simple');
+            break;
+        case 'simple':
+            $(this).removeClass('ultra-simple complexe').addClass('simple');
+            break;
+        case 'complexe':
+            $(this).removeClass('ultra-simple simple').addClass('complexe');
+            break;
+            
+    }
+});
+
+$('.complexity-dropdown').on('change', function() {
+    const selectedValue = $(this).val();
+    
+    // Get the charge dropdown within the neighboring <td>
+    const $chargeDropdown = $(this).closest('td').next().find('.charge-dropdown');
+    
+    let chargeValue;
+    switch(selectedValue) {
+        case 'ultra-simple':
+            chargeValue = '0.25';
+            break;
+        case 'simple':
+            chargeValue = '0.5';
+            break;
+        case 'complexe':
+            chargeValue = '0.75';
+            break;
+    }
+    $chargeDropdown.val(chargeValue).trigger('change');  // Set the value and trigger a change event
+});
+
+$('.charge-dropdown').on('change', function() {
+    switch ($(this).val()) {
+        case '0.125':
+            $(this).removeClass('simple complexe').addClass('ultra-simple');
+            break;
+        case '0.25':
+            $(this).removeClass('simple complexe').addClass('ultra-simple');
+            break;
+        case '0.5':
+            $(this).removeClass('ultra-simple complexe').addClass('simple');
+            break;
+        case '0.75':
+            $(this).removeClass('ultra-simple simple').addClass('complexe');
+            break;
+        case '1':
+            $(this).removeClass('ultra-simple simple').addClass('complexe');
+            break;
+            
+    }
+});
+
+// Declare counter outside of the click function
+let counter = 9;
+
+$('#ajouterBtn').click(function() {
+    let pageName = $('#pageInput').val(); // Get the value from the input
+
+    // Ensure the input isn't empty
+    if (pageName.trim() !== "") {
+        let newRow = `
+        <tr class="tr-all-pages">
+            <td>
+                <button data-id="${counter}" class="btn btn-warning btn-generate addBtn" data-toggle="modal" data-target="#urlModal">
+                    <i class="fas fa-plus"></i>
+                </button> 
+            </td>
+            <td>
+                <input type="checkbox" class="rowCheckbox" style="display: none;">
+            </td>
+            <td>
+                <span class="text-danger">Introuvable</span>
+            </td>
+            <td>
+                <p class="text-sm font-weight-bold mb-0 page-name">${pageName}</p>
+            </td>
+            <td class="align-middle text-center text-sm all-components">
+                <!-- For now, it'll be empty since we don't have the components for the new page -->
+            </td>
+            <td>
+                <select class="complexity-dropdown" data-default="ultra-simple">
+                    <option value="ultra-simple" selected>Ultra Simple</option>
+                    <option value="simple">Simple</option>
+                    <option value="complexe">Complexe</option>
+                </select>
+            </td>
+            <td>
+                <select class="charge-dropdown" data-default="0.25">
+                    <option value="0.125" >0.125</option>
+                    <option value="0.25" selected>0.25</option>
+                    <option value="0.5">0.5</option>
+                    <option value="0.75">0.75</option>
+                    <option value="1">1</option>
+                </select>
+            </td>
+        </tr>
+        `;
+
+        // Append the new row to the table
+        $('#comp-table tbody').append(newRow);  // Adjusted the selector to directly target the tbody of the table.
+
+        // Attach the event to the newly added button
+        let newButton = $('#comp-table tbody tr:last .addBtn')[0];
+        attachButtonEvent(newButton);
+
+        // Clear the input value
+        $('#pageInput').val('');
+        
+        // Close the modal
+        $('#addLinePage').modal('hide');
+
+        // Increment the counter
+        counter++;
+    } else {
+        alert("Please enter a page name");
+    }
+});
+document.querySelectorAll('.btn-generate.addBtn').forEach(button => {
+    attachButtonEvent(button);
 });

@@ -24,7 +24,7 @@ h2, h3 {
 .content{
     min-height: 79vh;
     margin: auto 320px;
-    padding: 20px;
+    padding: 5px;
 }
 .nav-pills{
     width: 300px;
@@ -68,6 +68,18 @@ h2, h3 {
     border-color: #ffffff ;
 }
 
+.history-content {
+    width: 100%;
+    height: auto;
+    background: #fff;
+    color: #000;
+    border-radius: 20px;
+    z-index: 1000;
+    box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
 .tab-content button:hover{
     border-radius: 15px;
     width: 100px;
@@ -76,6 +88,13 @@ h2, h3 {
     background-color: #ffffff;
     color: #2d2b6a;
     border-color: #2d2b6a;
+}
+
+#btn-search {
+    margin: 0;
+    width: 105px;
+    background-color: #2d2b6a;
+    border-color: #ffffff ;
 }
 
 #hostbutton {
@@ -241,7 +260,7 @@ h2, h3 {
 }
 
 .nav-item {
-    margin: 0 10px;
+    margin: 0 5px;
 }
 
 .main-nav-item {

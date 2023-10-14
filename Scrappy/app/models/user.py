@@ -30,6 +30,11 @@ class User(db.Model, UserMixin):
     @classmethod
     def get_by_id(cls, user_id):
         return cls.query.get(user_id)
+    
+    @classmethod
+    def get_username_by_id(cls, user_id):
+        user = cls.query.get(user_id)
+        return user.username if user else None
 
     def update(self, **kwargs):
         for key, value in kwargs.items():

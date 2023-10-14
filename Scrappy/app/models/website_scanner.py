@@ -17,6 +17,7 @@ class WebsiteScanner:
         self.visited_urls = set()
         self.href_set = set()
         self.session = requests.Session()  # Create one session for all requests
+        self.errors = []
 
     def scan_website(self):
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -27,9 +28,12 @@ class WebsiteScanner:
                 try:
                     result = future.result()
                 except Exception as e:
-                    print(f"Error occurred while scanning a URL: {e}")
+                    error_msg = f"Error occurred while scanning URL: {e}"
+                    self.errors.append(error_msg)
+                    print(error_msg)
 
-        print("This is the result of the url:", self.urlResultArray)
+        # print("This is the result of the url:", self.urlResultArray)
+        return self.errors
 
     def scan_url(self, url):
         dataResults = []
@@ -57,23 +61,44 @@ class WebsiteScanner:
                     absolute_url = urljoin(url, href)
                     # Check if the absolute URL belongs to the website being scanned
                     if self.is_same_website(url, absolute_url) and absolute_url not in self.visited_urls:
-                        self.visited_urls.add(absolute_url)
-                        print('Im here: ', absolute_url)
-                        # Check if the href value is already in the set, skip if it's a duplicate
-                        if href in self.href_set:
-                            continue
 
-                        # Add the href value to the set
-                        self.href_set.add(href)
+                        try:
+                            # ... scanning logic ...
+                            self.visited_urls.add(absolute_url)
+                            print('Im here: ', absolute_url)
+                            # Check if the href value is already in the set, skip if it's a duplicate
+                            if href in self.href_set:
+                                continue
 
-                        # Process the anchor tag
-                        dataResults.append({
-                            'absolute_url': absolute_url,
-                            'page_title': self.get_page_title(absolute_url),
-                            'page_components': self.scan_page_components(absolute_url),
-                            'page_type': self.get_type_page(absolute_url)
-                        })
-                        count += 1
+                            # Add the href value to the set
+                            self.href_set.add(href)
+
+                            # Get page components once
+                            page_components = self.scan_page_components(absolute_url)
+
+                            # Process the anchor tag
+                            dataResults.append({
+                                'absolute_url': absolute_url,
+                                'page_title': self.get_page_title(absolute_url),
+                                'page_components': page_components,
+                                'page_type': self.get_type_page(absolute_url),
+                                'complexity': self.determine_complexity(page_components)
+                            })
+                            count += 1
+                        except TypeError as e:
+                            if str(e) == "unhashable type: 'dict'":
+                                # Handle the specific error, perhaps logging additional details
+                                print(f"Error with URL {url}: {e}")
+                                # Add more detailed error message to errors list
+                                self.errors.append(f"Error with URL {url}: {e}")
+                            else:
+                                raise
+                        except Exception as e:
+                            # Handle other exceptions
+                            print(f"Error with URL {url}: {e}")
+                            self.errors.append(f"Error with URL {url}: {e}")
+
+                        
 
         # Add the result of count_pages function to urlResults
         self.urlResults = {
@@ -94,21 +119,50 @@ class WebsiteScanner:
         # If successful, create a BeautifulSoup object
         if response.status_code == 200:
             soup = BeautifulSoup(response.content, 'html.parser')
-            
-            # Fetch the necessary details
-            absolute_url = url
-            page_title = soup.title.string if soup.title else "No Title"
-            page_components = self.scan_page_components(url)
-            page_type = self.get_type_page(url)
 
-            return {
-                'absolute_url': absolute_url,
-                'page_title': page_title,
-                'page_components': page_components,
-                'page_type': page_type
-            }
+            try:
+            
+                # Fetch the necessary details
+                absolute_url = url
+                page_title = soup.title.string if soup.title else "No Title"
+                page_components = self.scan_page_components(url)
+                page_type = self.get_type_page(url)
+
+                return {
+                    'absolute_url': absolute_url,
+                    'page_title': page_title,
+                    'page_components': page_components,
+                    'page_type': page_type,
+                    'complexity': self.determine_complexity(page_components)
+                }
+            except TypeError as e:
+                if str(e) == "unhashable type: 'dict'":
+                    # Handle the specific error, perhaps logging additional details
+                    print(f"Error with URL {url}: {e}")
+                    # Add more detailed error message to errors list
+                    self.errors.append(f"Error with URL {url}: {e}")
+                else:
+                    raise
+            except Exception as e:
+                # Handle other exceptions
+                print(f"Error with URL {url}: {e}")
+                self.errors.append(f"Error with URL {url}: {e}")
 
         return None
+    
+    def determine_complexity(self, components):
+        ultrasimple_components = {'image', 'citation', 'pdf', 'Recherche'}
+        simple_additions = {'table', 'formulaire'}
+        complex_components = {'video', 'audio', 'cadre'}
+
+        if set(components).issubset(ultrasimple_components):
+            return 'ultra-simple'
+        elif any(item in simple_additions for item in components):
+            return 'simple'
+        elif any(item in complex_components for item in components):
+            return 'complexe'
+        else:
+            return 'simple'  # Return a default complexity
 
 
     def is_same_website(self, base_url, absolute_url):

@@ -1,5 +1,5 @@
 # app/routes/scan.py
-from flask import Blueprint, redirect, render_template, request, url_for, send_from_directory, jsonify
+from flask import Blueprint, redirect, render_template, request, url_for, send_from_directory, jsonify, flash
 from flask_login import login_required, current_user
 from app.models.website_scanner import WebsiteScanner
 from openpyxl import Workbook, load_workbook
@@ -20,30 +20,52 @@ def scan():
     values_list = list(form_data.values())
     values_list = list(set(values_list))
 
-    scanner = WebsiteScanner(values_list)
-    scanner.scan_website()
+    try:
+        scanner = WebsiteScanner(values_list)
+        errors = scanner.scan_website()
 
-    urlResults = scanner.get_urls()
-    total_results = len(urlResults)
-    total_pages = sum(int(data['page_count']) for data in urlResults)
-    average_pages_per_result = total_pages / total_results if total_results > 0 else 0
+        if errors:
+            for error in errors:
+                flash(error, 'danger')
+            # return redirect(url_for('index.index'))
 
-    # # Store website and sample data in the database
-    # for result in urlResults:
-    #     # Check if website already exists
-    #     website = Website.query.filter_by(link=result['url']).first()
+        urlResults = scanner.get_urls()
+        total_results = len(urlResults)
+        total_pages = sum(int(data['page_count']) for data in urlResults)
+        average_pages_per_result = total_pages / total_results if total_results > 0 else 0
 
-    #     # If it doesn't exist, create a new website entry using the provided class method
-    #     if not website:
-    #         website = Website.create(user_id=current_user.id, link=result['url'])
-
-    #     # Add the sample data using the provided class method
-    #     Sample.create(website_id=website.id, sample_data=str(result['all_urls']))
-
-    return render_template('res.html',
+        return render_template('res.html',
                            urlResults=urlResults,
                            sum_page_count=total_pages,
                            average_pages_per_result=average_pages_per_result)
+    except Exception as e:
+        flash(f'An error occurred: {e}', 'danger')  # flash the error message
+        return redirect(url_for('index.index'))  # redirect back to the same page
+    
+
+@bp.route('/scan-manual', methods=["GET", "POST"])
+@login_required
+def scan_manual():
+    if request.method == "GET":
+        return redirect(url_for('index.index'))
+    
+    form_data = request.form.to_dict()
+    first_value = next(iter(form_data.values()))
+
+
+    urlResults = [
+        {
+            'url': first_value,
+            'page_count': 1, 
+            'all_urls': []
+        }
+    ]
+    print(urlResults)
+
+    return render_template('res.html',
+                           urlResults=urlResults,
+                           sum_page_count=1,
+                           average_pages_per_result=1)
 
 
 @bp.route('/scan/single/', methods=["GET", "POST"])

@@ -172,6 +172,22 @@ body {
     transition: all 0.3s;  
 }
 
+.complexity-dropdown {
+    border: none;             /* Removes default border */
+    padding: 5px;       /* Button padding */
+    border-radius: 5px;       /* Rounded corners */
+    cursor: pointer;          /* Hand cursor when hovered */
+    transition: all 0.3s;
+}
+
+.charge-dropdown {
+    border: none;             /* Removes default border */
+    padding: 5px;       /* Button padding */
+    border-radius: 5px;       /* Rounded corners */
+    cursor: pointer;          /* Hand cursor when hovered */
+    transition: all 0.3s;
+}
+
 .btn-generate:hover {
     background-color: #93003d7b;  /* Darker shade for hover effect */
 }
@@ -440,3 +456,28 @@ input[type="checkbox"]:focus {
     overflow-y: auto;
 }
 
+.complexity-dropdown.ultra-simple {
+    background-color: green;
+    color: white;
+}
+.complexity-dropdown.simple {
+    background-color: orange;
+    color: white;
+}
+.complexity-dropdown.complexe {
+    background-color: rgba(255, 0, 0, 0.675);
+    color: white;
+}
+
+.charge-dropdown.ultra-simple {
+    background-color: green;
+    color: white;
+}
+.charge-dropdown.simple {
+    background-color: orange;
+    color: white;
+}
+.charge-dropdown.complexe {
+    background-color: rgba(255, 0, 0, 0.675);
+    color: white;
+}

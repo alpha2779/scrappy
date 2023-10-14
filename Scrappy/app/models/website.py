@@ -18,7 +18,10 @@ class Website(db.Model):
     @classmethod
     def get_by_user_id(cls, user_id):
         return cls.query.filter_by(user_id=user_id).all()
-
+    
+    @classmethod
+    def get_by_website_id(cls, website_id):
+        return cls.query.filter_by(id=website_id).first()
 
     def update(self, **kwargs):
         for key, value in kwargs.items():
