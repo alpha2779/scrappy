@@ -215,7 +215,7 @@ function getSelectedRowsData(buttonElement) {
     section.querySelectorAll('.tr-all-pages').forEach(row => {
         const checkboxes = Array.from(row.querySelectorAll('.rowCheckbox'));
         const links = Array.from(row.querySelectorAll('.lien-page'));
-        const pageName = row.querySelector('.page-name').textContent.trim();
+        const pageName = row.querySelector('.page-name').value;
         const complexity = Array.from(row.querySelectorAll('.complexity-dropdown'));
 
         checkboxes.forEach((checkbox, index) => {
@@ -353,6 +353,8 @@ function closeModal() {
     if (closeButton) closeButton.click();
 }
 
+// end of first bloc
+
 function submitURL() {
     const url = document.getElementById('urlInput').value.trim(); // Added trim to remove any leading/trailing spaces
 
@@ -476,14 +478,27 @@ document.getElementById('validerBtn').addEventListener('click', function() {
         // Assuming 2nd <td> is for the URL and 3rd <td> is for the page name and 4th <td> is for components
         targetRow.querySelector('td:nth-child(3)').innerHTML = `<a class="lien-page mb-0 text-sm" href="${rowData.url}" target="_blank">${rowData.url} <i class="fas fa-external-link-alt"></i></a>`;
         
-        targetRow.querySelector('td:nth-child(5)').innerHTML = rowData.page_components.map(comp => `<span class="badge badge-sm bg-gradient-success">${comp}</span>`).join(' ');
-
+        targetRow.querySelector('td:nth-child(5)').innerHTML = rowData.page_components.map(comp => `<span class="badge badge-sm bg-gradient-success">${comp}</span>`).join(' ') + 
+        `<button type="button" class="btn btn-primary btn-sm btn-comp ml-2" data-toggle="modal" data-target="#componentsModal">
+            <i class="fas fa-plus"></i>
+        </button>`;
+        
         targetRow.querySelector('td:nth-child(6)').innerHTML = `
         <select class="complexity-dropdown ${rowData.complexity} " data-default="${rowData.complexity} ">
             <option value="ultra-simple" {% if ${rowData.complexity} == 'ultra-simple' %}selected{% endif %}>Ultra Simple</option>
             <option value="simple" {% if ${rowData.complexity} == 'simple' %}selected{% endif %}>Simple</option>
             <option value="complexe" {% if ${rowData.complexity} == 'complexe' %}selected{% endif %}>Complexe</option>
         </select>
+        `;
+
+        targetRow.querySelector('td:nth-child(7)').innerHTML = `
+            <select class="charge-dropdown ${rowData.complexity}" data-default="0.25">
+                <option value="0.125" >0.125</option>
+                <option value="0.25" selected>0.25</option>
+                <option value="0.5">0.5</option>
+                <option value="0.75">0.75</option>
+                <option value="1">1</option>
+            </select>
         `;
 
         // After data from modal is added to table
@@ -582,26 +597,16 @@ $('#ajouterBtn').click(function() {
                 <span class="text-danger">Introuvable</span>
             </td>
             <td>
-                <p class="text-sm font-weight-bold mb-0 page-name">${pageName}</p>
+                <input type="text" class="form-control page-name" value="${pageName}" name="url">
             </td>
             <td class="align-middle text-center text-sm all-components">
                 <!-- For now, it'll be empty since we don't have the components for the new page -->
             </td>
             <td>
-                <select class="complexity-dropdown" data-default="ultra-simple">
-                    <option value="ultra-simple" selected>Ultra Simple</option>
-                    <option value="simple">Simple</option>
-                    <option value="complexe">Complexe</option>
-                </select>
+                <!-- Complexity Dropdown -->
             </td>
             <td>
-                <select class="charge-dropdown" data-default="0.25">
-                    <option value="0.125" >0.125</option>
-                    <option value="0.25" selected>0.25</option>
-                    <option value="0.5">0.5</option>
-                    <option value="0.75">0.75</option>
-                    <option value="1">1</option>
-                </select>
+                <!-- Charge Dropdown -->
             </td>
         </tr>
         `;
@@ -627,4 +632,39 @@ $('#ajouterBtn').click(function() {
 });
 document.querySelectorAll('.btn-generate.addBtn').forEach(button => {
     attachButtonEvent(button);
+});
+
+// When the modal's 'Ajouter les composants' button is clicked
+$("#componentsModal .btn-primary").click(function() {
+    let selectedComponents = "";
+    
+    // Loop through checked components
+    $("#componentsModal .form-check-input:checked").each(function() {
+        let value = $(this).val();
+        
+        // Append to the selectedComponents string with the desired styling
+        selectedComponents += `
+        <span class="badge badge-sm bg-gradient-success">
+            ${value} 
+            <i class="fas fa-times delete-component" style="cursor: pointer; margin-left: 5px;"></i>
+        </span> 
+    `;
+        });
+    
+    // Add the selected components to the 'Composants' cell of the current row.
+    // (Assuming the modal was opened from the respective row)
+    // Modify this if your structure differs.
+    $(".modal.show").data("sourceRow").find(".all-components").prepend(selectedComponents);
+    
+    // Close the modal
+    $("#componentsModal").modal('hide');
+});
+
+// When the 'Ajouter un composant' button is clicked, save the source row
+$(".btn[data-target='#componentsModal']").click(function() {
+    $("#componentsModal").data("sourceRow", $(this).closest("tr"));
+});
+
+$(document).on("click", ".delete-component", function() {
+    $(this).closest('.badge').remove();
 });

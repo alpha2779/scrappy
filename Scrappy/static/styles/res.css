@@ -481,3 +481,26 @@ input[type="checkbox"]:focus {
     background-color: rgba(255, 0, 0, 0.675);
     color: white;
 }
+
+.btn-comp {
+    background-color: #B00057;
+    color: #ffffff;           /* White text color */
+    border: none;             /* Removes default border */
+    padding: 0px 5px;       /* Button padding */
+    border-radius: 5px;       /* Rounded corners */
+    cursor: pointer;          /* Hand cursor when hovered */
+    transition: all 0.3s;
+    width: 100%;
+}
+
+.btn-comp:hover {
+    background-color: #93003d7b;  /* Darker shade for hover effect */
+}
+
+.btn-comp:focus {
+    box-shadow: none;           /* Removes default focus box-shadow */
+}
+
+.btn-comp:disabled {
+    background-color: #b0005841;
+}

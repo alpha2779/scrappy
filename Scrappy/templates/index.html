@@ -7,11 +7,11 @@
   <main class="content" role="main">
     <ul class="nav nav-pills" role="tablist">
       <li class="nav-item">
-        <a class="nav-link active" data-toggle="pill" href="#url">URL</a>
+        <a class="nav-link active" data-toggle="pill" href="#url">Auto</a>
       </li>
-      <li class="nav-item">
+      <!-- <li class="nav-item">
         <a class="nav-link" data-toggle="pill" href="#multiple-urls">Plusieurs URLs</a>
-      </li>
+      </li> -->
       <li class="nav-item">
         <a class="nav-link" data-toggle="pill" href="#manual-url">Manuel</a>
       </li>
@@ -45,7 +45,7 @@
         </form>
       </div>
 
-      <div id="multiple-urls" class="container tab-pane fade">
+      <!-- <div id="multiple-urls" class="container tab-pane fade">
         <form method="POST" action="/scan-multiple" onsubmit="showLoading()">
           <div class="form-group">
             <label for="multiple-url">URLs</label>
@@ -54,7 +54,7 @@
           </div>
           <button id="scan-btn" type="submit" class="btn btn-primary">Scanner</button>
         </form>
-      </div>
+      </div> -->
 
       <div id="manual-url" class="container tab-pane fade">
         <form method="POST" action="/scan-manual" onsubmit="showLoading()">
