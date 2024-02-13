@@ -289,7 +289,92 @@ body {
     color: #C04D00;
 }
 
+/* nav links */
 
+.nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+
+}
+
+.nav-list {
+    display: flex;
+    list-style: none;
+    padding: 0;
+}
+
+.nav-item {
+    /* margin: 0 10px; */
+}
+
+.main-nav-item {
+    height: 15px;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #2d2b6a;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.nav-link:hover {
+    background-color: #f1f1f1;
+}
+
+.nav-link-active {
+    background-color: #0f8570;
+    color: #ffffff;
+}
+
+/* custom modal  */
+
+.modal-side {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 700px;
+    max-width: 90%; /* You can adjust this value if you want the modal to be wider */
+    height: 100%;
+    transform: none !important;
+    margin: 0;
+    overflow-y: auto; /* This is to ensure any content taller than the viewport can be scrolled */
+}
+
+.modal.fade .modal-side .modal-dialog {
+    transform: translate3d(100%, 0, 0);
+    transition: opacity 0.2s linear, right 0.2s ease-out;
+}
+
+.modal.show .modal-side .modal-dialog {
+    transform: none;
+}
+
+.modal-content {
+    height: 100%;
+}
+
+.modal-side-validate {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 800px;
+    max-width: 90%; /* You can adjust this value if you want the modal to be wider */
+    height: 100%;
+    transform: none !important;
+    margin: 0;
+    overflow-y: auto; /* This is to ensure any content taller than the viewport can be scrolled */
+}
+
+.modal-body {
+    max-height: calc(100vh - 100px); /* adjust 200px to whatever suits your needs */
+    overflow-y: auto;
+}
 
 
 
