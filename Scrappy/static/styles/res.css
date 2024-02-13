@@ -29,7 +29,7 @@ body {
 
 /* Adjust the size of the image */
 .sidebar-logo img {
-    height: 7rem; /* or any desired size */
+    height: 5rem; /* or any desired size */
     width: auto;
 }
 

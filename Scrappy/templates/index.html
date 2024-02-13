@@ -45,6 +45,34 @@
       </div>
     </div>
   </main>
+
+  {% with messages = get_flashed_messages(category_filter=["error"]) %}
+  {% if messages %}
+  <div class="modal" tabindex="-1" role="dialog" id="errorModal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> Erreur lors du scan!</h4>
+            <p>Je suis dans l'incapacité de scanner cette URL que tu as fournie. Voici quelques actions que tu peux essayer :</p>
+            <hr>
+            <ul>
+              <li>Vérifier l'URL saisie.</li>
+              <li>Si tu as saisi plusieurs URLs, essaie d'en entrer une à la fois.</li>
+              <li>Ou essaie de le faire manuellement.</li>
+            </ul>
+          </div>
+          <!-- <p>{{ messages[0] }}</p> -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary btn-okay" data-dismiss="modal">Okay</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  {% endif %}
+{% endwith %}
 {% endblock %}
 
 {% block script %}

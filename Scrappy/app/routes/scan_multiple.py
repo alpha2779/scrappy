@@ -1,5 +1,5 @@
 # app/routes/scan_multiple.py
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_required
 from app.models.website_scanner import WebsiteScanner
 
@@ -18,6 +18,13 @@ def scan_multiple():
 
     scanner = WebsiteScanner(urls)
     scanner.scan_website()
+
+    # Check if an error occurred during scanning
+    if scanner.error_occurred:
+        # Use flash to send an error message
+        flash("Impossible to proceed due to an error.", "error")
+        # Redirect back to the same page (the index page in this case)
+        return redirect(url_for('index.index'))
 
     urlResults = scanner.urlResultArray
     sum_page_count = sum(int(data['page_count']) for data in urlResults)

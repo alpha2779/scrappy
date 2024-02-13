@@ -1,5 +1,5 @@
 # app/routes/scan.py
-from flask import Blueprint, redirect, render_template, request, url_for, send_from_directory
+from flask import Blueprint, redirect, render_template, request, url_for, send_from_directory, flash
 from flask_login import login_required
 from app.models.website_scanner import WebsiteScanner
 from openpyxl import Workbook, load_workbook
@@ -12,34 +12,31 @@ bp = Blueprint('scan', __name__)
 @login_required
 def scan():
     if request.method == "GET":
-        # Redirect them to the homepage or wherever you'd like
         return redirect(url_for('index.index'))
 
     form_data = request.form.to_dict()
-    values_list = list(form_data.values())
-
-    # Remove duplicates from values_list
-    values_list = list(set(values_list))
+    values_list = list(set(form_data.values()))
 
     scanner = WebsiteScanner(values_list)
     scanner.scan_website()
 
+    # Check if an error occurred during scanning
+    if scanner.error_occurred:
+        # Use flash to send an error message
+        flash("Impossible to proceed due to an error.", "error")
+        # Redirect back to the same page (the index page in this case)
+        return redirect(url_for('index.index'))
+
+    # If no error occurred, proceed as before
     urlResults = scanner.get_urls()
     total_results = len(urlResults)
     total_pages = sum(int(data['page_count']) for data in urlResults)
-    average_pages_per_result = total_pages / \
-        total_results if total_results > 0 else 0
-
-    print("This is the sum of the page count...", total_pages)
-    print("This is the total results...", total_results)
-    print("This is the average", average_pages_per_result)
+    average_pages_per_result = total_pages / total_results if total_results > 0 else 0
 
     return render_template('res.html',
                            urlResults=urlResults,
                            sum_page_count=total_pages,
                            average_pages_per_result=average_pages_per_result)
-
-
 
 @bp.route('/scan/generate/', methods=["POST"])
 @login_required
