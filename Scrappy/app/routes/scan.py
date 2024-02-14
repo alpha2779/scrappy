@@ -10,6 +10,7 @@ from app.models.sample import Sample
 
 bp = Blueprint('scan', __name__)
 
+
 @bp.route('/scan', methods=["GET", "POST"])
 @login_required
 def scan():
@@ -32,31 +33,32 @@ def scan():
         urlResults = scanner.get_urls()
         total_results = len(urlResults)
         total_pages = sum(int(data['page_count']) for data in urlResults)
-        average_pages_per_result = total_pages / total_results if total_results > 0 else 0
+        average_pages_per_result = total_pages / \
+            total_results if total_results > 0 else 0
 
         return render_template('res.html',
-                           urlResults=urlResults,
-                           sum_page_count=total_pages,
-                           average_pages_per_result=average_pages_per_result)
+                               urlResults=urlResults,
+                               sum_page_count=total_pages,
+                               average_pages_per_result=average_pages_per_result)
     except Exception as e:
         flash(f'An error occurred: {e}', 'danger')  # flash the error message
-        return redirect(url_for('index.index'))  # redirect back to the same page
-    
+        # redirect back to the same page
+        return redirect(url_for('index.index'))
+
 
 @bp.route('/scan-manual', methods=["GET", "POST"])
 @login_required
 def scan_manual():
     if request.method == "GET":
         return redirect(url_for('index.index'))
-    
+
     form_data = request.form.to_dict()
     first_value = next(iter(form_data.values()))
-
 
     urlResults = [
         {
             'url': first_value,
-            'page_count': 1, 
+            'page_count': 1,
             'all_urls': []
         }
     ]
@@ -87,7 +89,6 @@ def scan_single():
         return jsonify({"error": "Failed to scan the URL"}), 500
 
 
-
 @bp.route('/scan/generate/', methods=["POST"])
 @login_required
 def generate():
@@ -113,7 +114,7 @@ def generate():
         ws.cell(row=start_row, column=4, value=item['components'])
         # ... Populate other columns as needed
         start_row += 1
-        
+
     # Check if website already exists
     website = Website.query.filter_by(link=website_link).first()
 
@@ -129,10 +130,10 @@ def generate():
     output_filename = f'output_{current_time_str}.xlsx'
 
     excel_file_path = current_dir.parent.parent / "Dowloads"
-    
+
     # Ensure the directory exists
     excel_file_path.mkdir(parents=True, exist_ok=True)
-    
+
     # Joining paths correctly using the `/` operator
     full_path = excel_file_path / output_filename
 
@@ -141,4 +142,3 @@ def generate():
 
     # Note: send_from_directory expects string paths, so we convert the directory path to a string
     return send_from_directory(directory=str(excel_file_path), path=output_filename, as_attachment=True)
-
