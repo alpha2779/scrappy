@@ -491,15 +491,15 @@ document.getElementById('validerBtn').addEventListener('click', function() {
         </select>
         `;
 
-        targetRow.querySelector('td:nth-child(7)').innerHTML = `
-            <select class="charge-dropdown ${rowData.complexity}" data-default="0.25">
-                <option value="0.125" >0.125</option>
-                <option value="0.25" selected>0.25</option>
-                <option value="0.5">0.5</option>
-                <option value="0.75">0.75</option>
-                <option value="1">1</option>
-            </select>
-        `;
+        // targetRow.querySelector('td:nth-child(7)').innerHTML = `
+        //     <select class="charge-dropdown ${rowData.complexity}" data-default="0.25">
+        //         <option value="0.125" >0.125</option>
+        //         <option value="0.25" selected>0.25</option>
+        //         <option value="0.5">0.5</option>
+        //         <option value="0.75">0.75</option>
+        //         <option value="1">1</option>
+        //     </select>
+        // `;
 
         // After data from modal is added to table
         // Locate the row based on currentRow
@@ -588,7 +588,7 @@ $('#ajouterBtn').click(function() {
             <td>
                 <button data-id="${counter}" class="btn btn-warning btn-generate addBtn" data-toggle="modal" data-target="#urlModal">
                     <i class="fas fa-plus"></i>
-                </button> 
+                </button>
             </td>
             <td>
                 <input type="checkbox" class="rowCheckbox" style="display: none;">
@@ -604,9 +604,6 @@ $('#ajouterBtn').click(function() {
             </td>
             <td>
                 <!-- Complexity Dropdown -->
-            </td>
-            <td>
-                <!-- Charge Dropdown -->
             </td>
         </tr>
         `;
@@ -668,3 +665,36 @@ $(".btn[data-target='#componentsModal']").click(function() {
 $(document).on("click", ".delete-component", function() {
     $(this).closest('.badge').remove();
 });
+
+function addRowToSampleTable(checkbox) {
+    // Get the parent row
+    var parentRow = $(checkbox).closest('tr');
+
+    if (checkbox.checked) {
+        // Clone the parent row to preserve the structure
+        var newRow = parentRow.clone();
+
+        // Hide the first two columns in the cloned row
+        newRow.find('td:eq(0)').css('display', 'none');
+
+        // Create two new columns and add content
+        var newCol1 = $('<td><button style="display: none;" data-id="{{ loop.index }}" class="btn btn-warning btn-generate addBtn" data-toggle="modal" data-target="#urlModal"><i class="fas fa-plus"></i></button></td>');
+        var newCol2 = $('<td><input type="checkbox" class="rowCheckbox" style="display: none;" checked></td>');
+
+        // Add the new columns to the cloned row in the first and second positions
+        newRow.find('td:eq(0)').before(newCol1);
+        newRow.find('td:eq(1)').before(newCol2);
+
+        // Get the destination table
+        var tableBody = $('#comp-table tbody');
+
+        // Add the new row to the destination table starting from the third column
+        tableBody.append(newRow);
+    } else {
+        // If the checkbox is unchecked, remove the corresponding row
+        parentRow.remove();
+    }
+
+}
+
+

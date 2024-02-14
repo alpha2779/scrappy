@@ -504,3 +504,8 @@ input[type="checkbox"]:focus {
 .btn-comp:disabled {
     background-color: #b0005841;
 }
+
+.nav-link.active[aria-selected="true"] {
+    background-color: #0f8570; /* Background color for active links */
+    color: #fff; /* Text color for active links */
+  }
