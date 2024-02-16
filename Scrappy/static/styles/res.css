@@ -1,10 +1,24 @@
+:root {
+    --custom-checkbox-color: #B00057;
+    --custom-checkbox-disabled: #959495;
+}
+  
 body {
-    /* font-family: Arial, sans-serif; */
     font-family: "Open Sans",sans-serif;
     margin: auto;
     padding: 0;
+    font-size: 14px;
     overflow-x: hidden; /* Prevent horizontal scroll when sidebar is open */
 }
+
+h1{
+    font-size: 30px;
+}
+
+h2 {
+    font-size: 28px;
+}
+
 #sidebar {
     height: 100vh; /* This makes the sidebar take up the full height of the viewport. */
     background-color: #2E2B6A; /* This sets the background color. */
@@ -59,18 +73,16 @@ body {
     overflow: hidden; /* Hide overflow content */
     text-overflow: ellipsis; /* Add ... for overflow content */
     white-space: nowrap; /* Prevent wrapping */
+    max-width: 100%;
 }
 
 
 .nav-link {
     display: flex;
     align-items: center; /* To vertically align the icon with the text */
-    width: 95%; /* Adjust width as needed */
-    overflow: hidden; /* Hide overflow content */
-    text-overflow: ellipsis; /* Add ... for overflow content */
-    white-space: nowrap; /* Prevent wrapping */
-    width: 95%; /* Adjust width as needed */
+    width: 100%;
     padding-left: 5px; /* Add some space between the icon and the text */
+    font-size: 14px;
 }
 
 .nav-link i {
@@ -101,16 +113,16 @@ body {
 
 .btn-new-scan {
     background-color: #B00057;
-    color: #ffffff;           /* White text color */
-    border: none;             /* Removes default border */
-    padding: 10px 15px;       /* Button padding */
-    border-radius: 5px;       /* Rounded corners */
-    cursor: pointer;          /* Hand cursor when hovered */
-    transition: all 0.3s;     /* Transition effect for smooth color change */
-    display: block;           /* Makes the button block-level */
-    width: 100%;              /* Spans the entire width */
-    text-align: center;       /* Centers the text */
-
+    color: #ffffff;        
+    border: none;             
+    padding: 8px 12px;       
+    border-radius: 5px;       
+    cursor: pointer;          
+    transition: all 0.3s;
+    display: block;       
+    width: 100%; 
+    text-align: start;
+    font-size: 14px;
 }
 
 .btn-new-scan:hover {
@@ -165,10 +177,11 @@ body {
     background-color: #B00057;
     color: #ffffff;           /* White text color */
     border: none;             /* Removes default border */
-    padding: 10px 15px;       /* Button padding */
+    padding: 8px 15px;       /* Button padding */
     border-radius: 5px;       /* Rounded corners */
     cursor: pointer;          /* Hand cursor when hovered */
     transition: all 0.3s;  
+    font-size: 14px;
 }
 
 .btn-generate:hover {
@@ -202,7 +215,7 @@ body {
     background: #fff;
     padding: 5px;
     border-radius: 5px;
-    margin-top: 20px;
+    margin-top: 0;
 
     header {
         h3 {
@@ -249,7 +262,7 @@ body {
 .bg-gradient-success {
     background-color: #2d2b6a;
     outline: 1px solid #0f8570;
-    display: block;
+    display: inline-block;
     clear: both;
     margin-bottom: 5px;
 }
@@ -289,6 +302,25 @@ body {
     color: #C04D00;
 }
 
+/* card body */
+
+.card-body {
+    padding: 0.5rem;
+}
+
+.card-small-txt {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.card-h5 {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+
+/* -------------- */
+
 /* nav links */
 
 .nav-bar {
@@ -307,6 +339,8 @@ body {
 
 .nav-item {
     /* margin: 0 10px; */
+    border-radius: 5px;
+    margin: 2px;
 }
 
 .main-nav-item {
@@ -329,6 +363,86 @@ body {
     background-color: #0f8570;
     color: #ffffff;
 }
+
+.nav-link-main-panel {
+    text-decoration: none;
+    color: #2d2b6a;
+    background-color: #2d2b6a26;
+    padding: 5px 10px;
+    font-size: 14px;
+    
+}
+
+.nav-link-main-panel:hover {
+    text-decoration: none;
+    color: #2d2b6a;
+    background-color: #2d2b6a71;
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+.nav-link-main-panel.active {
+    text-decoration: none;
+    color: #ffffff;
+    background-color: #2d2b6a;
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+/* table  */
+
+.th-composant {
+    width: 250px;
+}
+/* -------------- */
+
+/* custom-checkbox */
+  
+input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: var(--form-background);
+    margin: 0;
+    font: inherit;
+    color: currentColor;
+    width: 1.15em;
+    height: 1.15em;
+    border: 0.15em solid currentColor;
+    border-radius: 0.1em;
+    transform: translateY(-0.075em);
+    display: grid;
+    place-content: center;
+}
+
+input[type="checkbox"]::before {
+    content: "";
+    width: 0.65em;
+    height: 0.65em;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+    transform: scale(0);
+    transform-origin: bottom left;
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 1em 1em var(--custom-checkbox-color);
+    background-color: CanvasText;
+}
+
+input[type="checkbox"]:checked::before {
+    transform: scale(1);
+}
+
+input[type="checkbox"]:focus {
+    outline: max(2px, 0.15em) solid currentColor;
+    outline-offset: max(2px, 0.15em);
+}
+
+input[type="checkbox"]:disabled {
+    --custom-checkbox-color: var(--custom-checkbox-disabled);
+
+    color: var(--custom-checkbox-disabled);
+    cursor: not-allowed;
+}
+
+/* ------------ */
 
 /* custom modal  */
 
@@ -376,6 +490,19 @@ body {
     overflow-y: auto;
 }
 
+.logo-icon {
+    margin-right: 5px;
+}
+
+.rounded-container {
+    background-color: #2E2B6A;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
 
 
