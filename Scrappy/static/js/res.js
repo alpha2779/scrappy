@@ -207,48 +207,38 @@ document.getElementById('confirmDownload').addEventListener('click', function() 
 function getSelectedRowsData(buttonElement) {
     const section = buttonElement.closest('.site-a-content');
     if (!section) {
-        console.error('Unable to find .site-section');
+        console.error('Unable to find .site-a-content');
         return [];
     }
 
-    const selectedRows = [];
-    section.querySelectorAll('.tr-all-pages').forEach(row => {
-        const checkboxes = Array.from(row.querySelectorAll('.rowCheckbox'));
-        const links = Array.from(row.querySelectorAll('.lien-page'));
-        const pageName = row.cells[2].textContent.trim();
+    console.log("getting rows");
+    console.log(section);
 
-        checkboxes.forEach((checkbox, index) => {
-            if (checkbox.checked) {
-                const url = links[index].textContent.trim();
+    const allRowsData = [];
+    section.querySelectorAll('.tr-sample-pages').forEach(row => {
+        const url = row.querySelector('.lien-page') ? row.querySelector('.lien-page').href.trim() : '';
+        const pageName = row.cells[2].textContent.trim(); // Adjusted assuming URL is in the first cell
 
-                // Collecting components associated with the selected link
-                const componentsContainer = row.cells[3];
+        // Collecting components associated with the row
+        const componentsContainer = row.cells[3]; // Adjusted assuming components are in the third cell
+        let components = [];
+        if (componentsContainer) {
+            components = Array.from(componentsContainer.querySelectorAll('span')).map(span => span.textContent.trim()).join(', ');
+        }
 
-                if(componentsContainer.querySelector('hr')) {
-                    // Case with <hr>
-                    const componentsSets = Array.from(componentsContainer.querySelectorAll('span, hr')).reduce((sets, el) => {
-                        if (el.tagName.toLowerCase() === 'hr' || !sets.length) {
-                            sets.push([]);
-                        } else {
-                            sets[sets.length - 1].push(el.textContent.trim());
-                        }
-                        return sets;
-                    }, []);
-                    const components = componentsSets[index] ? componentsSets[index].join(', ') : '';
-                    selectedRows.push({ url, pageName, components });
-                } else {
-                    // Case without <hr>
-                    const componentsList = Array.from(componentsContainer.querySelectorAll('span')).map(span => span.textContent.trim());
-                    const components = componentsList.join(', ');
-                    selectedRows.push({ url, pageName, components });
-                }
-            }
-        });
+        const chargeSelect = row.cells[4].querySelector('select');
+        // const charge = chargeSelect ? chargeSelect.value : ''; 
+        const charge = chargeSelect ? chargeSelect.options[chargeSelect.selectedIndex].text : '';
+
+        // Only add rows with a non-empty URL and Page Name to the results
+        if (url && pageName) {
+            allRowsData.push({ url, pageName, components, charge });
+        }
     });
 
     return {
         section,
-        rows: selectedRows
+        rows: allRowsData
     };
 }
 
@@ -270,7 +260,7 @@ function populateConfirmationModal(data) {
 
 function createHeaderRow() {
     const headerRow = document.createElement('tr');
-    const columns = ['ID', 'URL', 'Nom de la page', 'Composants'];
+    const columns = ['ID', 'URL', 'Nom de la page', 'Composants', 'Charge'];
 
     columns.forEach(col => {
         const th = document.createElement('th');
@@ -306,6 +296,10 @@ function createBodyRows(data) {
         const tdComponents = document.createElement('td');
         tdComponents.innerHTML = row.components.split(', ').map(comp => `<span class="badge badge-sm bg-gradient-success">${comp}</span>`).join(' ');
         tr.appendChild(tdComponents);
+
+        const tdCharge = document.createElement('td');
+        tdCharge.innerHTML = `<div class="complexity-dropdown ${row.charge.toLowerCase().replace(/\s+/g, '-')}">${row.charge}</div>`;
+        tr.appendChild(tdCharge);
 
         tbody.appendChild(tr);
     });
@@ -345,3 +339,135 @@ function closeModal() {
     const closeButton = document.querySelector('[data-dismiss="modal"]');
     if (closeButton) closeButton.click();
 }
+
+$('.rowCheckbox').change(function() {
+    var $checkbox = $(this);
+    var isChecked = $checkbox.is(':checked');
+    var $row = $checkbox.closest('tr').clone();
+
+    // Remove the checkbox from the cloned row
+    $row.find('td:first').remove();
+
+    // Reorder: Move the second column to be the first
+    var $secondTd = $row.find('td:eq(0)').detach();
+    $row.prepend($secondTd);
+
+    // Append a new select element and button to the end of the row
+    var $select = $('<select class="complexity-dropdown ultra-simple" data-default="Ultra Simple">' +
+                        '<option value="ultra-simple">Ultra Simple</option>' +
+                        '<option value="simple">Simple</option>' +
+                        '<option value="complexe">Complexe</option>' +
+                    '</select>');
+
+                    
+    var $button = $('<button class="btn-edit" title="Modifier">' +
+                        '<img src="/static/images/icon-edit.png" height="20px" alt="">' +
+                    '</button>');
+
+    var $beforeLastTd = $('<td></td>').append($select);
+    var $lastTd = $('<td></td>').append($button);
+    $row.append($beforeLastTd);
+    $row.append($lastTd);
+
+    if (isChecked) {
+        // Prepend a count cell to the cloned row before appending it
+        $row.prepend('<td class="row-count"></td>');
+        $row.addClass('tr-sample-pages');
+        $('#sample-pages-body').append($row);
+
+        $('#alert-container').html('<div class="alert alert-success" role="alert">Ajouté!</div>');
+        setTimeout(() => { $('#alert-container').html(''); }, 3000);
+    } else {
+        // Find and remove the matching row in the first table based on URL
+        var url = $row.find('td:eq(0)').text().trim(); // Adjust index to account for the new count cell
+        // console.log("URL to match:", url);
+        $('#sample-pages-body tr').each(function() {
+            var rowUrl = $(this).find('td:eq(1)').text().trim(); // Adjust index accordingly
+            // console.log("Comparing with:", rowUrl);
+            if (url === rowUrl) {
+                $(this).remove();
+                $('#alert-container').html('<div class="alert alert-danger" role="alert">Supprimé!</div>');
+                setTimeout(() => { $('#alert-container').html(''); }, 3000);
+            }
+        });
+    }
+
+    // Update counts for all rows in the first table
+    $('#sample-pages-body tr').each(function(index) {
+        $(this).find('td.row-count').text(index + 1);
+    });
+});
+
+$(document).on('change', '.complexity-dropdown', function() {
+    // Remove all specific option-related classes first
+    $(this).removeClass('ultra-simple simple complexe');
+    
+    // Add class based on the selected option's value
+    var selectedValueClass = $(this).val();
+    $(this).addClass(selectedValueClass);
+});
+
+
+var currentEditingRow;
+
+// Event listener for the "Modify" button
+$(document).on('click', '.btn-edit', function() {
+    currentEditingRow = $(this).closest('tr'); // Store the reference to the row
+    var $row = $(this).closest('tr');
+    var url = $row.find('td:eq(1)').text().trim(); // Adjust the index if needed
+    var pageName = $row.find('td:eq(2)').text().trim(); // Adjust the index if needed
+    // Populate the modal fields
+    $('#modalUrl').val(url);
+    $('#modalPageName').val(pageName);
+
+    // Clear previously checked checkboxes in the modal
+    $('#modificationModal .custom-checkbox input[type="checkbox"]').prop('checked', false);
+
+    // Extract components from the third column
+    var components = $row.find('td:eq(3) .badge').map(function() {
+        // Return the text content of the badge instead of a data attribute
+        return $(this).text().trim();
+    }).get();
+
+    // Check the corresponding checkboxes in the modal based on extracted components
+    $('#modificationModal .custom-checkbox input[type="checkbox"]').each(function() {
+        var checkboxValue = $(this).val();
+        // Check if the checkbox value is in the components array
+        if (components.includes(checkboxValue)) {
+            $(this).prop('checked', true);
+        }
+    });    
+    // Show the modal
+    $('#modificationModal').modal('show');
+});
+
+$('#modificationModal .btn-primary-modal').click(function() {
+    // Collect updated data from the modal
+    var updatedPageName = $('#modalPageName').val();
+    
+    // Collect the states of checkboxes
+    var updatedComponents = [];
+    $('#modificationModal .custom-checkbox input[type="checkbox"]:checked').each(function() {
+        updatedComponents.push($(this).val());
+    });
+
+    // Update the original row with the new values
+    if (currentEditingRow) {
+        currentEditingRow.find('td:eq(2)').text(updatedPageName);
+
+        // Update components - this example replaces all components with new spans
+        // This might need to be adjusted based on how you want to display updated components
+        var componentsHtml = updatedComponents.map(function(component) {
+            return '<span class="badge badge-sm bg-gradient-success">' + component + '</span>';
+        }).join('');
+
+        currentEditingRow.find('td:eq(3)').html(componentsHtml);
+
+        // Optionally, clear the reference to the current row being edited
+        currentEditingRow = null;
+    }
+    // Close the modal
+    $('#modificationModal').modal('hide');
+});
+
+

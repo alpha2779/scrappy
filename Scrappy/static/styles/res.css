@@ -5,10 +5,21 @@
   
 body {
     font-family: "Open Sans",sans-serif;
-    margin: auto;
+    margin: 0;
     padding: 0;
     font-size: 14px;
-    overflow-x: hidden; /* Prevent horizontal scroll when sidebar is open */
+    overflow-x: hidden;
+    background-color: #2E2B6A;
+    height: 100%;
+}
+
+main {
+    background-color: #ffffff;
+    margin-right: 10px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    min-height: 96vh;
 }
 
 h1{
@@ -24,7 +35,7 @@ h2 {
     background-color: #2E2B6A; /* This sets the background color. */
     overflow-y: hidden; /* Allows for scrolling if content exceeds sidebar's height. */
     position: fixed; /* Fixes the sidebar on the screen. */
-    width: 250px; /* or the width of your choice. */
+    width: 230px; /* or the width of your choice. */
     left: 0; /* Positions the sidebar at the left edge. */
     top: 0; /* Positions the sidebar at the top edge. */
 }
@@ -479,9 +490,11 @@ input[type="checkbox"]:disabled {
     bottom: 0;
     width: 800px;
     max-width: 90%; /* You can adjust this value if you want the modal to be wider */
-    height: 100%;
+    /* height: 100%; */
     transform: none !important;
-    margin: 0;
+    margin-right: 10px;
+    margin-top: 15px;
+    margin-bottom: 15px;;
     overflow-y: auto; /* This is to ensure any content taller than the viewport can be scrolled */
 }
 
@@ -504,5 +517,75 @@ input[type="checkbox"]:disabled {
     justify-content: center;
 }
 
+.btn-edit {
+    background-color: #B00057;
+    color: #ffffff;
+    border: none;
+    padding: 8px;
+    border-radius: 70px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+}
 
+.btn-edit:hover {
+    background-color: #b0005871;
+    color: #ffffff;
+    border: none;
+    padding: 8px;
+    border-radius: 70px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+}
 
+.complexity-dropdown {
+    border: 1px solid #b000581d ;             /* Removes default border */
+    padding: 5px;       /* Button padding */
+    border-radius: 5px;       /* Rounded corners */
+    cursor: pointer;          /* Hand cursor when hovered */
+    transition: all 0.3s;
+}
+
+.complexity-dropdown.ultra-simple {
+    background-color: green;
+    color: white;
+}
+.complexity-dropdown.simple {
+    background-color: rgb(244, 143, 0);
+    color: white;
+}
+.complexity-dropdown.complexe {
+    background-color: #B00057;
+    color: white;
+}
+
+.btn-primary-modal {
+    background-color: #B00057;
+    color: #ffffff;        
+    border: none;             
+    padding: 8px 12px;       
+    border-radius: 5px;       
+    cursor: pointer;          
+    transition: all 0.3s;
+    display: block;       
+    text-align: start;
+    font-size: 14px;
+}
+
+.btn-primary-modal:hover {
+    background-color: #93003E;  /* Darker shade for hover effect */
+}
+
+.btn-primary-modal:focus {
+    box-shadow: none;           /* Removes default focus box-shadow */
+}
+
+#alert-container {
+    position: fixed;
+    bottom: 40px; /* Adjust as needed */
+    right: 40px; /* Adjust as needed */
+    z-index: 1050; /* Ensures it appears above most other content */
+    width: auto; /* Adjust based on your alert's width, or keep it auto */
+    max-width: 100%; /* Ensures it doesn't overflow the viewport */
+}

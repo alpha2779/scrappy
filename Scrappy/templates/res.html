@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static',filename='styles/res.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='styles/table.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static',filename='images/favicon.png') }}">
 </head>
 <body>
@@ -159,13 +160,13 @@
                     <!-- Summary -->
                     <h3 class="font-weight-bolder mb-2">Sommaire</h3>
                     <p>Cette section contient le sommaire des urls scannés.</p>
-                    <div class="table-responsive">
-                        <table class="table table-hover table-bordered">
-                            <thead class="thead-side-color">
+                    <div class="table__body">
+                        <table>
+                            <thead>
                                 <tr>
-                                    <th class="text-uppercase text-xxs font-weight-bolder opacity-7">URL</th>
-                                    <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Nombre de pages</th>
-                                    <th class="text-uppercase text-xxs font-weight-bolder opacity-7 ps-2">Complexité</th>
+                                    <th>URL</th>
+                                    <th>Nombre de pages</th>
+                                    <th>Complexité</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -206,10 +207,6 @@
                 <section id="site-a-content-{{ loop.index }}" class="site-a-content">
                     <header class="content-header">
                         <h2 style="padding: 0;">{{ data['url'] }}</h2>
-                        <button class="generateFiles btn-generate">
-                            <img src="{{ url_for('static',filename='images/icon-verified.png') }}" height="24px" alt="">
-                            Valider L'échantillon
-                        </button>
                     </header>
                 
                     <div class="row mb-3">
@@ -283,6 +280,9 @@
                     <div>
                         <ul class="nav nav-tabs mb-3" id="myTabs" role="tablist">
                             <li class="nav-item" role="presentation">
+                                <a class="nav-link-main-panel rounded-0 border-top-0 border-left-0 border-right-0 font-weight-bold" id="sample-pages-tab-{{ loop.index }}" data-toggle="tab" href="#sample-pages-{{ loop.index }}" role="tab" aria-controls="sample-pages-{{ loop.index }}" aria-selected="false">Mon Échantillon</a>
+                            </li>
+                            <li class="nav-item" role="presentation">
                                 <a class="nav-link-main-panel active rounded-0 border-top-0 border-left-0 border-right-0 font-weight-bold" id="mandatory-pages-tab-{{ loop.index }}" data-toggle="tab" href="#mandatory-pages-{{ loop.index }}" role="tab" aria-controls="mandatory-pages-{{ loop.index }}" aria-selected="true">Pages obligatoires</a>
                             </li>
                             <li class="nav-item" role="presentation">
@@ -291,6 +291,38 @@
                         </ul>
 
                         <div class="tab-content" id="myTabContent">
+                            <!-- Sample tab panel -->
+                            <div class="tab-pane fade" id="sample-pages-{{ loop.index }}" role="tabpanel" aria-labelledby="sample-pages-tab-{{ loop.index }}">
+                                <section class="sample-pages">
+                                    <header style="display: flex; align-items: center; justify-content: space-between;">
+                                        <div>
+                                            <h3>Mon Échantillon</h3>
+                                            <p>Votre échantillon se construit dans cette page.</p>
+                                        </div>
+                                        <button class="generateFiles btn-generate">
+                                            <img src="{{ url_for('static',filename='images/icon-verified.png') }}" height="24px" alt="">
+                                            Valider L'échantillon
+                                        </button>
+                                    </header>
+                                    <div class="table-wrapper">
+                                        <div class="table__body">
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th> Id </th>
+                                                        <th> URL </th>
+                                                        <th> Nom de page </th>
+                                                        <th> Composants </th>
+                                                        <th> Charge </th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="sample-pages-body"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
                             <!-- Pages obligatoires tab panel -->
                             <div class="tab-pane fade show active" id="mandatory-pages-{{ loop.index }}" role="tabpanel" aria-labelledby="mandatory-pages-tab-{{ loop.index }}">
                                 <section class="mandatory-pages">
@@ -302,84 +334,86 @@
                                     </header>
                                     <div class="table-wrapper">
                                         {% set desired_page_names = ["Accueil", "Mentions Légales","Contact", "Accessibilité", "Plan du site", "Aide", "Authentification","Recherche"] %}
-                                        <table class="table table-hover table-bordered">
-                                            <thead class="thead-side-color">
-                                                <tr>
-                                                    <th class="text-uppercase text-white font-weight-bolder text-white selectedCount">0</th>
-                                                    <th class="text-uppercase text-white font-weight-bolder ps-2">URL</th>
-                                                    <th class="text-uppercase text-white font-weight-bolder text-white ">Nom de page</th>
-                                                    <th class="text-uppercase text-white font-weight-bolder ps-2 th-composant">Composants</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for page_name in desired_page_names %}
-                                                {% set found = false %}
-                                                <tr class="tr-page-name">
-                                                    <td colspan="4"><p class="text-sm font-weight-bold mb-0">{{ page_name }}</p></td>
-                                                </tr>
-                                                {% for dataAllUrls in data['all_urls'] %}
-                                                    {% if dataAllUrls['page_type'] is not none and dataAllUrls['page_type'] == page_name %}
-                                                        {% if not found %}
-                                                            {% set found = true %}
-                                                        {% endif %}
-                                                        <tr class="tr-all-pages">
-                                                            <td>
-                                                                <input id="option1" type="checkbox" class="rowCheckbox"/>
-                                                            </td>
-                                                            <td>
-                                                                <div class="d-flex px-2">
-                                                                    <div class="my-auto">
-                                                                        <a class="lien-page mb-0 text-sm" href="{{ dataAllUrls['absolute_url'] }}" target="_blank">
-                                                                            {{ dataAllUrls['absolute_url'] }}
-                                                                            <i class="fas fa-external-link-alt"></i>
-                                                                        </a>
+                                        <div class="table__body">
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th> 0 </th>
+                                                        <th> URL </th>
+                                                        <th> Nom de page </th>
+                                                        <th> Composants </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for page_name in desired_page_names %}
+                                                    {% set found = false %}
+                                                    <tr>
+                                                        <td colspan="4"><p class="text-sm font-weight-bold mb-0">{{ page_name }}</p></td>
+                                                    </tr>
+                                                    {% for dataAllUrls in data['all_urls'] %}
+                                                        {% if dataAllUrls['page_type'] is not none and dataAllUrls['page_type'] == page_name %}
+                                                            {% if not found %}
+                                                                {% set found = true %}
+                                                            {% endif %}
+                                                            <tr>
+                                                                <td>
+                                                                    <input id="option1" type="checkbox" class="rowCheckbox"/>
+                                                                </td>
+                                                                <td>
+                                                                    <div>
+                                                                        <div>
+                                                                            <a class="lien-page mb-0 text-sm" href="{{ dataAllUrls['absolute_url'] }}" target="_blank">
+                                                                                {{ dataAllUrls['absolute_url'] }}
+                                                                                <i class="fas fa-external-link-alt"></i>
+                                                                            </a>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <p class="text-sm font-weight-bold mb-0">{{ page_name }}</p>
-                                                            </td>
-                                                            <td class="align-middle text-center text-sm">
-                                                                <span class="badge sr-only">Page obligatoire</span>
-                                                                {% if dataAllUrls['page_components'] is not none %}
-                                                                    {% for component in dataAllUrls['page_components'] %}
-                                                                        {% if component == 'image' %}
-                                                                        <span class="badge badge-sm bg-gradient-success">Images(s)</span>
-                                                                        {% elif component == 'video' %}
-                                                                        <span class="badge badge-sm bg-gradient-success">Video(s)</span>
-                                                                        {% elif component == 'audio' %}
-                                                                        <span class="badge badge-sm bg-gradient-success">Audio(s)</span>
-                                                                        {% elif component == 'table' %}
-                                                                        <span class="badge badge-sm bg-gradient-success">Tableau(s)</span>
-                                                                        {% elif component == 'cadre' %}
-                                                                        <span class="badge badge-sm bg-gradient-success">Cadre(s)</span>
-                                                                        {% elif component == 'formulaire' %}
-                                                                        <span class="badge badge-sm bg-gradient-success">Autre Formulaire(s)</span>
-                                                                        {% elif component == 'Recherche' %}
-                                                                        <span class="badge badge-sm bg-gradient-success">Form Recherche</span>
-                                                                        {% elif component == 'citation' %}
-                                                                        <span class="badge badge-sm bg-gradient-success">Citation(s)</span>
-                                                                        {% elif component is mapping and 'pdf_count' in component %}
-                                                                        <span class="badge sr-only">PDF</span>
-                                                                        <span class="badge badge-sm bg-gradient-success">PDF: {{ component['pdf_count'] }}</span>
-                                                                        {% endif %}
-                                                                    {% endfor %}
-                                                                {% endif %}
-                                                            </td>
+                                                                </td>
+                                                                <td>
+                                                                    <p class="text-sm font-weight-bold mb-0">{{ page_name }}</p>
+                                                                </td>
+                                                                <td class="text-sm">
+                                                                    <span class="badge sr-only">Page obligatoire</span>
+                                                                    {% if dataAllUrls['page_components'] is not none %}
+                                                                        {% for component in dataAllUrls['page_components'] %}
+                                                                            {% if component == 'image' %}
+                                                                            <span class="badge badge-sm bg-gradient-success">Images(s)</span>
+                                                                            {% elif component == 'video' %}
+                                                                            <span class="badge badge-sm bg-gradient-success">Video(s)</span>
+                                                                            {% elif component == 'audio' %}
+                                                                            <span class="badge badge-sm bg-gradient-success">Audio(s)</span>
+                                                                            {% elif component == 'table' %}
+                                                                            <span class="badge badge-sm bg-gradient-success">Tableau(s)</span>
+                                                                            {% elif component == 'cadre' %}
+                                                                            <span class="badge badge-sm bg-gradient-success">Cadre(s)</span>
+                                                                            {% elif component == 'formulaire' %}
+                                                                            <span class="badge badge-sm bg-gradient-success">Autre Formulaire(s)</span>
+                                                                            {% elif component == 'Recherche' %}
+                                                                            <span class="badge badge-sm bg-gradient-success">Form Recherche</span>
+                                                                            {% elif component == 'citation' %}
+                                                                            <span class="badge badge-sm bg-gradient-success">Citation(s)</span>
+                                                                            {% elif component is mapping and 'pdf_count' in component %}
+                                                                            <span class="badge sr-only">PDF</span>
+                                                                            <span class="badge badge-sm bg-gradient-success">PDF: {{ component['pdf_count'] }}</span>
+                                                                            {% endif %}
+                                                                        {% endfor %}
+                                                                    {% endif %}
+                                                                </td>
+                                                            </tr>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    {% if not found %}
+                                                        <tr>
+                                                            <td></td>
+                                                            <td><span class="text-danger">Introuvable</span></td>
+                                                            <td><p class="text-sm font-weight-bold mb-0">{{ page_name }}</p></td>
+                                                            <td></td>
                                                         </tr>
                                                     {% endif %}
                                                 {% endfor %}
-                                                {% if not found %}
-                                                    <tr class="tr-all-pages">
-                                                        <td></td>
-                                                        <td><span class="text-danger">Introuvable</span></td>
-                                                        <td><p class="text-sm font-weight-bold mb-0">{{ page_name }}</p></td>
-                                                        <td></td>
-                                                    </tr>
-                                                {% endif %}
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </section>
                             </div>
@@ -402,14 +436,14 @@
                                         <button class="badge badge-sm bg-filter filter-option" data-component="Form Recherche">Form Recherche</button>
                                         <button class="badge badge-sm bg-filter filter-option" data-component="PDF">PDF</button>
                                     </div>
-                                    <div class="table-wrapper">
-                                        <table id="table-{{ loop.index }}" class="table table-hover table-bordered">
-                                            <thead class="thead-side-color">
+                                    <div class="table__body">
+                                        <table id="table-{{ loop.index }}">
+                                            <thead>
                                                 <tr>
-                                                    <th class="text-uppercase text-white font-weight-bolder text-white selectedCount">0</th>
-                                                    <th class="text-uppercase text-white font-weight-bolder ">URL</th>
-                                                    <th class="text-uppercase text-white font-weight-bolder ps-2">Nom de page</th>
-                                                    <th class="text-uppercase text-white font-weight-bolder ps-2 th-composant">Composants</th>
+                                                    <th class="selectedCount">0</th>
+                                                    <th>URL</th>
+                                                    <th>Nom de page</th>
+                                                    <th>Composants</th>
                                                 </tr>
                                             </thead>
                                             <tbody class="tbody-all-pages">
@@ -420,8 +454,8 @@
                                                             <input type="checkbox" class="rowCheckbox">
                                                         </td>
                                                         <td>
-                                                            <div class="d-flex px-2">
-                                                                <div class="my-auto">
+                                                            <div>
+                                                                <div>
                                                                     <a class="lien-page mb-0 text-sm" href="{{ dataAllUrls['absolute_url'] }}" target="_blank">
                                                                         {{ dataAllUrls['absolute_url'] }} 
                                                                         <i class="fas fa-external-link-alt"></i>
@@ -432,7 +466,7 @@
                                                         <td>
                                                             <p class="text-sm font-weight-bold mb-0">{{ dataAllUrls['page_title'] }} </p>
                                                         </td>
-                                                        <td class="align-middle text-center text-sm">
+                                                        <td class="text-sm">
                                                             {% if dataAllUrls['page_components'] is not none %}
                                                             {% for component in dataAllUrls['page_components'] %}
                                                                 {% if component == 'image' %}
@@ -474,14 +508,18 @@
                 
                 </section>
                 {% endfor %}
+
+
  
             </main>
             
         </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div id="alert-container"></div>
+
+    <!-- Validation Modal -->
+    <div class="modal" id="confirmationModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-side-validate" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -492,7 +530,9 @@
             </div>
             <div class="modal-body">
             <!-- The table to display selected rows will be dynamically populated using JS -->
-            <table id="confirmationTable" class="table table-hover table-bordered"></table>
+            <div class="table__body">
+                <table id="confirmationTable"></table>
+            </div>
             </div>
             <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Reprendre</button>
@@ -504,6 +544,78 @@
         </div>
         </div>
     </div>
+
+    <!-- Modification Modal -->
+    <div class="modal" id="modificationModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-side-validate" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title">Mon Échantillon</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Fermer la Modale">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+                <form id="modalForm">
+                    <div class="form-group">
+                        <label for="modalUrl">URL</label>
+                        <input type="text" class="form-control" id="modalUrl" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="modalPageName">Nom de page</label>
+                        <input type="text" class="form-control" id="modalPageName">
+                    </div>
+                    <div class="form-group">
+                        <fieldset>
+                            <legend>Composants</legend>
+                            <label for="images" class="custom-checkbox">
+                                <input id="images" type="checkbox" name="components" value="Images(s)" />
+                                Images(s)
+                            </label>
+                            <label for="videos" class="custom-checkbox">
+                                <input id="videos" type="checkbox" name="components" value="Video(s)" />
+                                Video(s)
+                            </label>
+                            <label for="audio" class="custom-checkbox">
+                                <input id="audio" type="checkbox" name="components" value="Audio(s)" />
+                                Audio(s)
+                            </label>
+                            <label for="tables" class="custom-checkbox">
+                                <input id="tables" type="checkbox" name="components" value="Tableau(s)" />
+                                Tableau(s)
+                            </label>
+                            <label for="frames" class="custom-checkbox">
+                                <input id="frames" type="checkbox" name="components" value="Cadre(s)" />
+                                Cadre(s)
+                            </label>
+                            <label for="quotes" class="custom-checkbox">
+                                <input id="quotes" type="checkbox" name="components" value="Citation(s)" />
+                                Citation(s)
+                            </label>
+                            <label for="forms" class="custom-checkbox">
+                                <input id="forms" type="checkbox" name="components" value="Autre Formulaire(s)" />
+                                Autre Formulaire(s)
+                            </label>
+                            <label for="searchForms" class="custom-checkbox">
+                                <input id="searchForms" type="checkbox" name="components" value="Form Recherche" />
+                                Form Recherche
+                            </label>
+                            <label for="pdf" class="custom-checkbox">
+                                <input id="pdf" type="checkbox" name="components" value="PDF" />
+                                PDF
+                            </label>
+                        </fieldset>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary btn-primary-modal">Mise à jour</button>
+            </div>
+        </div>
+        </div>
+    </div>
+    
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"></script>
