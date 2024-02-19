@@ -54,6 +54,7 @@ def generate():
         ws.cell(row=start_row, column=2, value=item['pageName'])
         ws.cell(row=start_row, column=3, value=item['url'])
         ws.cell(row=start_row, column=4, value=item['components'])
+        ws.cell(row=start_row, column=5, value=item['charge'])
         # ... Populate other columns as needed
         start_row += 1
 

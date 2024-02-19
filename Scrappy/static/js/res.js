@@ -26,14 +26,6 @@ function confirmScanAgain() {
     }
     return false;  // This ensures the button doesn't follow through with any default behavior
 }
-// window.addEventListener('popstate', function(event) {
-//   if (!confirm("Voulez-vous vraiment quitter cette page?")) {
-//       event.preventDefault();
-//   }
-// });
-
-// // The following line is necessary to initialize the popstate detection
-// history.pushState(null, null, document.URL);
 
 function setupConfirmationOnExit() {
     window.addEventListener('beforeunload', (e) => {
@@ -242,7 +234,6 @@ function getSelectedRowsData(buttonElement) {
     };
 }
 
-
 function populateConfirmationModal(data) {
     const table = document.getElementById('confirmationTable');
     table.innerHTML = ''; // Clear table
@@ -260,7 +251,7 @@ function populateConfirmationModal(data) {
 
 function createHeaderRow() {
     const headerRow = document.createElement('tr');
-    const columns = ['ID', 'URL', 'Nom de la page', 'Composants', 'Charge'];
+    const columns = ['ID', 'URL', 'Nom de la page', 'Composants', 'Complexité'];
 
     columns.forEach(col => {
         const th = document.createElement('th');
@@ -298,7 +289,7 @@ function createBodyRows(data) {
         tr.appendChild(tdComponents);
 
         const tdCharge = document.createElement('td');
-        tdCharge.innerHTML = `<div class="complexity-dropdown ${row.charge.toLowerCase().replace(/\s+/g, '-')}">${row.charge}</div>`;
+        tdCharge.innerHTML = `<div class="complexity-dropdown ${row.charge.toLowerCase()}">${row.charge}</div>`;
         tr.appendChild(tdCharge);
 
         tbody.appendChild(tr);
@@ -308,6 +299,7 @@ function createBodyRows(data) {
 }
 
 function sendDataToServer(data, section) {
+    console.log(data);
     fetch('/scan/generate/', {
         method: 'POST',
         headers: {
@@ -324,11 +316,21 @@ function sendDataToServer(data, section) {
         link.href = window.URL.createObjectURL(blob);
         link.download = "output.xlsx";
         link.click();
+        clearTable(section);
         uncheckSelectedRows(section);
         closeModal();
         resetCounterForSection(section);
     })
     .catch(error => console.error('Error:', error));
+}
+
+function clearTable(section) {
+    var $section = $(section);
+
+    $section.find('.sample-pages-body').empty();
+    
+    var noContentMessage = $section.find('.no-sample-message');
+    noContentMessage.css('display', 'block');
 }
 
 function uncheckSelectedRows(section) {
@@ -344,6 +346,7 @@ $('.rowCheckbox').change(function() {
     var $checkbox = $(this);
     var isChecked = $checkbox.is(':checked');
     var $row = $checkbox.closest('tr').clone();
+    var $context = $checkbox.closest('.site-a-content');
 
     // Remove the checkbox from the cloned row
     $row.find('td:first').remove();
@@ -353,13 +356,12 @@ $('.rowCheckbox').change(function() {
     $row.prepend($secondTd);
 
     // Append a new select element and button to the end of the row
-    var $select = $('<select class="complexity-dropdown ultra-simple" data-default="Ultra Simple">' +
-                        '<option value="ultra-simple">Ultra Simple</option>' +
+    var $select = $('<select class="complexity-dropdown ultra-simple" data-default="Ultra-simple">' +
+                        '<option value="ultra-simple">Ultra-simple</option>' +
                         '<option value="simple">Simple</option>' +
                         '<option value="complexe">Complexe</option>' +
                     '</select>');
 
-                    
     var $button = $('<button class="btn-edit" title="Modifier">' +
                         '<img src="/static/images/icon-edit.png" height="20px" alt="">' +
                     '</button>');
@@ -370,10 +372,10 @@ $('.rowCheckbox').change(function() {
     $row.append($lastTd);
 
     if (isChecked) {
-        // Prepend a count cell to the cloned row before appending it
+        var $targetTableBody = $context.find('.sample-pages-body');
         $row.prepend('<td class="row-count"></td>');
         $row.addClass('tr-sample-pages');
-        $('#sample-pages-body').append($row);
+        $targetTableBody.append($row);
 
         $('#alert-container').html('<div class="alert alert-success" role="alert">Ajouté!</div>');
         setTimeout(() => { $('#alert-container').html(''); }, 3000);
@@ -381,7 +383,7 @@ $('.rowCheckbox').change(function() {
         // Find and remove the matching row in the first table based on URL
         var url = $row.find('td:eq(0)').text().trim(); // Adjust index to account for the new count cell
         // console.log("URL to match:", url);
-        $('#sample-pages-body tr').each(function() {
+        $context.find('.sample-pages-body tr').each(function() {
             var rowUrl = $(this).find('td:eq(1)').text().trim(); // Adjust index accordingly
             // console.log("Comparing with:", rowUrl);
             if (url === rowUrl) {
@@ -392,11 +394,24 @@ $('.rowCheckbox').change(function() {
         });
     }
 
+    updateNoContentMessageVisibility($context);
+    updateRowCount($context);
+});
+
+function updateNoContentMessageVisibility($context) {
+    // Check if there are any rows in the table
+    var rowCount = $context.find('.sample-pages-body tr').length;
+    anySampleRowVisible = rowCount > 0; // Update the flag based on the row count
+    var noContentMessage = $context.find('.no-sample-message');
+    noContentMessage.css('display', anySampleRowVisible ? 'none' : 'block');
+}
+
+function updateRowCount($context) {
     // Update counts for all rows in the first table
-    $('#sample-pages-body tr').each(function(index) {
+    $context.find('.sample-pages-body tr').each(function(index) {
         $(this).find('td.row-count').text(index + 1);
     });
-});
+}
 
 $(document).on('change', '.complexity-dropdown', function() {
     // Remove all specific option-related classes first
@@ -406,7 +421,6 @@ $(document).on('change', '.complexity-dropdown', function() {
     var selectedValueClass = $(this).val();
     $(this).addClass(selectedValueClass);
 });
-
 
 var currentEditingRow;
 

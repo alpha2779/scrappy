@@ -35,7 +35,7 @@ h2 {
     background-color: #2E2B6A; /* This sets the background color. */
     overflow-y: hidden; /* Allows for scrolling if content exceeds sidebar's height. */
     position: fixed; /* Fixes the sidebar on the screen. */
-    width: 230px; /* or the width of your choice. */
+    /* width: 230px; or the width of your choice. */
     left: 0; /* Positions the sidebar at the left edge. */
     top: 0; /* Positions the sidebar at the top edge. */
 }
